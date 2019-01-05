@@ -1,0 +1,8 @@
+---
+AllCops:
+  Exclude:
+    - '.git/**/*'
+    - 'spec/**/*'
+
+Metrics/LineLength:
+  Enabled: false

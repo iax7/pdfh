@@ -1,0 +1,29 @@
+---
+scrape_dirs:
+  - ~/Dropbox/IFTTT
+  - ~/Downloads
+base_path: ~/Dropbox/Impuestos
+document_types:
+  - name: Password Protected (test)
+    re_file: '.*EstadodeCuenta\.pdf'
+    re_date: 'al \d{1,2} de (\w+) del? (\d+)'
+    pwd: dGVzdAo=
+    store_path: "/FISCAL-{YEAR}/Edo Cuenta"
+    name_template: '{period} {type}'
+    sub_types:
+      - name: Platinum
+      - name: Perfiles
+        month_offset: -1
+  - name: Cuenta
+    re_file: 'EdoCta( ?\(\d+\))?\.pdf'
+    re_date: '(\d{2})\/(?<m>\w+)\/(?<y>\d{4})'
+    pwd:
+    store_path: '{YEAR}/Edo Cuenta'
+    name_template: '{period} Enlace Banorte'
+  - name: With Companion XML
+    re_file: \w{8}-(\w{4}-){3}\w{12}.pdf
+    re_date: 'De (?<y>\d{4})-(?<m>\d{2})-\d{2} al \d{4}-\d{2}-(?<d>\d{2})'
+    pwd:
+    store_path: '/FISCAL-{YEAR}/Nomina'
+    name_template: '{period} {extra}'
+    print_cmd: lpr -o page-ranges=1 -o media=letter -o fit-to-page
