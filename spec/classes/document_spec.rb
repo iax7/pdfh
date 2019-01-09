@@ -12,18 +12,22 @@ RSpec.describe Pdfh::Document do
       re_date: /\d{2}\/(?<m>\w+)\/(?<y>\d{4})/,
       pwd: nil,
       store_path: '{YEAR}/Edo Cuenta',
-      name_template: '{period} Enlace Cuenta'
+      name_template: '{period} {type} {subtype}',
+      sub_types: [{ 'name' => 'Enlace' }]
     }
     OpenStruct.new(hash)
   end
 
-  subject { Pdfh::Document.new(cuenta_file, cuenta_type) }
+  subject { described_class.new(cuenta_file, cuenta_type) }
 
   context '#initialize' do
     it 'correctly' do
-      expect(subject.sub_type).to eq('N/A')
+      expect(subject.sub_type).to eq('Enlace')
       expect(subject.year).to eq(2019)
       expect(subject.month).to eq(1)
+    end
+    it 'fails when does not exists' do
+      expect{ described_class.new('/does_not_exists.pdf', cuenta_type) }.to raise_error(IOError)
     end
   end
 
@@ -42,6 +46,10 @@ RSpec.describe Pdfh::Document do
     expect(subject.file_name).to eq('cuenta.pdf')
   end
 
+  it '#backup_name' do
+    expect(subject.backup_name).to eq('cuenta.pdf.bkp')
+  end
+
   it '#store_path' do
     expect(subject.store_path).to eq('2019/Edo Cuenta')
   end
@@ -51,7 +59,7 @@ RSpec.describe Pdfh::Document do
   end
 
   it '#new_name' do
-    expect(subject.new_name).to eq('2019-01 Enlace Cuenta.pdf')
+    expect(subject.new_name).to eq('2019-01 Cuenta Enlace.pdf')
   end
 
   context '#companion_files' do
@@ -68,11 +76,28 @@ RSpec.describe Pdfh::Document do
     end
   end
 
-  it '#write_pdf' do
-    expect(Dir).to receive(:exist?).and_return(true)
-    expect(Pdfh::Dry).to receive(:active?).and_return(true)
+  context '#write_pdf' do
+    it 'runs Dry' do
+      expect(Dir).to receive(:exist?).and_return(true)
+      expect(Pdfh::Dry).to receive(:active?).and_return(true)
 
-    expect(subject.write_pdf('/')).to eq(nil)
+      expect(subject.write_pdf('/tmp')).to eq(nil)
+    end
+    it 'writes pdf successfuly' do
+      expect(Dir).to receive(:exist?).and_return(true)
+      expect(subject).to receive(:`).and_return(nil)
+      expect(File).to receive(:file?).with('/tmp/2019/Edo Cuenta/2019-01 Cuenta Enlace.pdf').and_return(true)
+      expect(File).to receive(:rename).and_return(true)
+      expect(subject).to receive(:find_companion_files).and_return(['cuenta.xml'])
+      expect(FileUtils).to receive(:cp).and_return(true)
+      subject.write_pdf('/tmp')
+    end
+    it 'fail to write pdf' do
+      expect(Dir).to receive(:exist?).and_return(true)
+      expect(subject).to receive(:`).and_return(nil)
+
+      expect{ subject.write_pdf('/tmp') }.to raise_error(IOError)
+    end
   end
 
   context '#month' do
@@ -97,12 +122,14 @@ RSpec.describe Pdfh::Document do
       subject.instance_variable_set(:@month, '1')
 
       expect(subject.month).to eq(12)
+      expect(subject.year).to eq(2018)
     end
     it 'has offset +1 | from 2019-12 -> 2020-01' do
       subject.instance_variable_set(:@month_offset, 1)
       subject.instance_variable_set(:@month, '12')
 
       expect(subject.month).to eq(1)
+      expect(subject.year).to eq(2020)
     end
   end
 

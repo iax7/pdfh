@@ -36,10 +36,6 @@ module Pdfh
       nil
     end
 
-    def to_s
-      super
-    end
-
     private
 
     def process_doc_types(doc_types)

@@ -34,9 +34,13 @@ module Pdfh
       @month_offset = 0
       @year_offset = 0
 
-      Verbose.print "=== Type: #{type.name} =================="
+      raise IOError, "File #{file} not found" unless File.exist?(file)
+
+      Verbose.print "=== Type: #{type_name} =================="
       @text = pdf_text
-      Verbose.print "Text extracted: #{@text}"
+      Verbose.print "  Text extracted: #{@text}"
+      @sub_type = extract_subtype(@type.sub_types)
+      Verbose.print "  SubType: #{@sub_type}"
       @month, @year, @extra = match_data
       Verbose.print "==== Assigned: #{@month}, #{@year}, #{@extra} ==( Month, Year, Extra )================"
     end
@@ -74,8 +78,16 @@ module Pdfh
       File.basename(@file)
     end
 
+    def backup_name
+      "#{file_name}.bkp"
+    end
+
+    def type_name
+      @type ? @type.name : 'N/A'
+    end
+
     def sub_type
-      type.subtype ? type.subtype.name : 'N/A'
+      @sub_type ? @sub_type.name : 'N/A'
     end
 
     def new_name
@@ -83,6 +95,7 @@ module Pdfh
       new_name = template
                  .gsub(/\{original\}/, file_name_only)
                  .gsub(/\{period\}/, period)
+                 .gsub(/\{type\}/, type_name)
                  .gsub(/\{subtype\}/, sub_type)
                  .gsub(/\{extra\}/, extra || '')
       "#{new_name}.pdf"
@@ -95,6 +108,7 @@ module Pdfh
     def to_s
       <<~STR
         Name     : #{file_name_only}
+        Type     : #{type_name}
         Sub Type : #{sub_type}
         Period   : #{period}
         File Path: #{file}
@@ -116,7 +130,7 @@ module Pdfh
       full_path = File.join(base_path, store_path, new_name)
       dir_path = File.join(base_path, store_path)
 
-      raise IOError unless Dir.exist?(dir_path)
+      raise IOError, "Path #{dir_path} was not found." unless Dir.exist?(dir_path)
 
       password_opt = "--password='#{@type.pwd}'" if @type.pwd
       cmd = %(qpdf #{password_opt} --decrypt '#{@file}' '#{full_path}')
@@ -125,16 +139,34 @@ module Pdfh
       return if Dry.active?
 
       _result = `#{cmd}`
-      raise IOError unless File.file?(full_path)
+      raise IOError, "File #{full_path} was not created." unless File.file?(full_path)
 
       # Making backup of original
-      bkp_name = "#{file_name}.bkp"
-      File.rename(file, bkp_name)
+      Dir.chdir(home_dir) do
+        File.rename(file, backup_name)
+      end
 
       copy_companion_files(dir_path)
     end
 
     private
+
+    ##
+    # @param [Array] subtypes
+    # @return [OpenStruct]
+    def extract_subtype(sub_types)
+      return nil if sub_types.nil? || sub_types.empty?
+
+      sub_types.each do |st|
+        is_matched = Regexp.new(st['name']).match?(@text)
+        next unless is_matched
+
+        sub = OpenStruct.new(st)
+        @month_offset = sub.month_offset || 0
+        return sub
+      end
+      nil
+    end
 
     def normalize_month
       month_num = @month.to_i

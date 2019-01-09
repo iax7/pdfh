@@ -43,7 +43,8 @@ module Pdfh
       end
     end
   rescue StandardError => e
-    puts e.message.colorize(:red)
+    line = e.backtrace[0].match(/:(\d+)/)[1]
+    puts "Error, #{e.message}. #{line}".colorize(:red)
     exit 1
   end
 
@@ -73,6 +74,6 @@ module Pdfh
       end
     end
 
-    raise StandardError.new("Error, no configuraton file (#{names_to_look.join(' or ')}) was found\n       within paths: #{dir_order.join(', ')}")
+    raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n       within paths: #{dir_order.join(', ')}"
   end
 end

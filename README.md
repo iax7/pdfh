@@ -1,28 +1,33 @@
 # Pdfh
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pdfh`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Examine all PDF files in scrape directories, remove password (if has one), rename and copy to a new directory using regular expresions.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'pdfh'
+```bash
+gem install pdfh
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install pdfh
 
 ## Usage
 
-After installing this gem you need to create your configuration file.
+After installing this gem you need to create your configuration file on your home folder.
+`pdfh.yml`
+```yaml
+---
+scrape_dirs:       # Directories where all pdf's are going to be analyzed
+  - ~/Downloads
+base_path: ~/PDFs  # Directory where all matching documents will be copied
+document_types:
+  - name: Document From Bank              # Description
+    re_file: '.*MyBankReg\.pdf'           # Regular expression to match its filename
+    re_date: 'al \d{1,2} de (\w+) del? (\d+)' # Date regular expresion
+    pwd: base64string                     # [OPTIONAL] Password if the document is protected
+    store_path: "{YEAR}/bank_docs"        # Relative path to copy this document
+    name_template: '{period} {subtype}'   # Template for new filename when copied
+    sub_types:                            # [OPTIONAL] In case your need an extra category 
+      - name: Account1                       # Regular expresion to match this subtype
+        month_offset: -1                     # [OPTIONAL] Integer value to adjust month
+```
 
 ## Development
 

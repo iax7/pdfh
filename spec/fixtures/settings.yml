@@ -1,8 +1,7 @@
 ---
 scrape_dirs:
-  - ~/Dropbox/IFTTT
   - ~/Downloads
-base_path: ~/Dropbox/Impuestos
+base_path: ~/Files
 document_types:
   - name: Password Protected (test)
     re_file: '.*EstadodeCuenta\.pdf'
@@ -10,16 +9,14 @@ document_types:
     pwd: dGVzdAo=
     store_path: "/FISCAL-{YEAR}/Edo Cuenta"
     name_template: '{period} {type}'
-    sub_types:
-      - name: Platinum
-      - name: Perfiles
-        month_offset: -1
   - name: Cuenta
     re_file: 'EdoCta( ?\(\d+\))?\.pdf'
     re_date: '(\d{2})\/(?<m>\w+)\/(?<y>\d{4})'
     pwd:
     store_path: '{YEAR}/Edo Cuenta'
-    name_template: '{period} Enlace Banorte'
+    name_template: '{period} {type} {subtype}'
+    sub_types:
+      - name: Enlace
   - name: With Companion XML
     re_file: \w{8}-(\w{4}-){3}\w{12}.pdf
     re_date: 'De (?<y>\d{4})-(?<m>\d{2})-\d{2} al \d{4}-\d{2}-(?<d>\d{2})'

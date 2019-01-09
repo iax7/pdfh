@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pdfh (0.1.0)
+    pdfh (0.1.2)
       colorize (~> 0.8.1)
 
 GEM

@@ -4,10 +4,10 @@ require 'simplecov'
 require 'simplecov-console'
 
 # Simplecov
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
-  SimpleCov::Formatter::HTMLFormatter ||
-  SimpleCov::Formatter::Console
-)
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
+  SimpleCov::Formatter::Console,
+  SimpleCov::Formatter::HTMLFormatter
+])
 SimpleCov.start do
   add_filter '/spec/'
   add_filter '/bin/'
