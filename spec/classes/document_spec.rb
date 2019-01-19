@@ -64,12 +64,12 @@ RSpec.describe Pdfh::Document do
 
   context '#companion_files' do
     it 'has files' do
-      expect(subject).to receive(:find_companion_files).and_return(['cuenta.xml'])
       res = subject.companion_files(join: true)
 
       expect(res).to eq('cuenta.xml')
     end
     it 'has no files' do
+      subject.instance_variable_set(:@companion, [])
       res = subject.companion_files(join: true)
 
       expect(res).to eq('N/A')
@@ -88,7 +88,6 @@ RSpec.describe Pdfh::Document do
       expect(subject).to receive(:`).and_return(nil)
       expect(File).to receive(:file?).with('/tmp/2019/Edo Cuenta/2019-01 Cuenta Enlace.pdf').and_return(true)
       expect(File).to receive(:rename).and_return(true)
-      expect(subject).to receive(:find_companion_files).and_return(['cuenta.xml'])
       expect(FileUtils).to receive(:cp).and_return(true)
       subject.write_pdf('/tmp')
     end

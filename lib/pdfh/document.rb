@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+
 module Pdfh
   ##
   # Handles the PDF detected by the rules
@@ -43,6 +45,7 @@ module Pdfh
       Verbose.print "  SubType: #{@sub_type}"
       @month, @year, @extra = match_data
       Verbose.print "==== Assigned: #{@month}, #{@year}, #{@extra} ==( Month, Year, Extra )================"
+      @companion = find_companion_files
     end
 
     def period
@@ -107,26 +110,26 @@ module Pdfh
 
     def to_s
       <<~STR
-        Name     : #{file_name_only}
-        Type     : #{type_name}
-        Sub Type : #{sub_type}
-        Period   : #{period}
+        Name:      #{file_name_only}
+        Type:      #{type_name}
+        Sub Type:  #{sub_type}
+        Period:    #{period}
         File Path: #{file}
         File Name: #{file_name}
-        New Name : #{new_name}
+        New Name:  #{new_name}
         StorePath: #{store_path}
+        Companion: #{companion_files(join: true)}
       STR
     end
 
     def companion_files(join: false)
-      files = find_companion_files
+      @companion unless join
 
-      files unless join
-
-      files.empty? ? 'N/A' : files.join(', ')
+      @companion.empty? ? 'N/A' : @companion.join(', ')
     end
 
     def write_pdf(base_path)
+      Verbose.print '~~~~~~~~~~~~~~~~~~ Writing PDFs'
       full_path = File.join(base_path, store_path, new_name)
       dir_path = File.join(base_path, store_path)
 
@@ -219,15 +222,22 @@ module Pdfh
       Dir.chdir(home_dir) do
         all_files = Dir["#{file_name_only}.*"]
         companion = all_files.reject { |f| f.include? 'pdf' }
+        Verbose.print "     - #{companion.join(', ')}"
 
         companion || []
       end
     end
 
     def copy_companion_files(destination)
-      find_companion_files.each do |file|
-        Verbose.print "  cp #{file} --> #{destination}"
-        FileUtils.cp(file, destination)
+      Verbose.print '~~~~~~~~~~~~~~~~~~ Writing Companion files'
+      @companion.each do |file|
+        Verbose.print "  Working on #{file}..."
+        src_name = File.join(home_dir, file)
+        src_ext = File.extname(file)
+        dest_name = File.basename(new_name, '.pdf')
+        dest_full = File.join(destination, "#{dest_name}#{src_ext}")
+        Verbose.print "    cp #{src_name} --> #{dest_full}"
+        FileUtils.cp(src_name, dest_full)
       end
     end
   end
