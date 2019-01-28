@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 require 'fileutils'
+require 'ext/string'
 
 module Pdfh
+  using Pdfh::String
+
   ##
   # Handles the PDF detected by the rules
   # TODO: Replace command utils with this gem
@@ -86,11 +89,11 @@ module Pdfh
     end
 
     def type_name
-      @type ? @type.name : 'N/A'
+      @type ? @type.name.titleize : 'N/A'
     end
 
     def sub_type
-      @sub_type ? @sub_type.name : 'N/A'
+      @sub_type ? @sub_type.name.titleize : 'N/A'
     end
 
     def new_name
