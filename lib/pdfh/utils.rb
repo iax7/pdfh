@@ -2,9 +2,8 @@
 
 require 'colorize'
 
+# Contains all generic short functionality
 module Pdfh
-  class Error < StandardError; end
-
   ##
   # Keeps Verbose option in whole project
   class Verbose
@@ -33,5 +32,11 @@ module Pdfh
         @active
       end
     end
+  end
+
+  def self.print_error(exception, exit_app: true)
+    line = exception.backtrace[0].match(/:(?<line>\d+)/)[:line]
+    puts "Error, Line[#{line}]: #{exception.message}.".colorize(:red)
+    exit 1 if exit_app
   end
 end

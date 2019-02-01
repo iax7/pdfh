@@ -12,41 +12,51 @@ module Pdfh
     Verbose.active = options[:verbose]
     Dry.active = options[:dry]
 
-    settings = Settings.new(search_config_file)
-
-    settings.scrape_dirs.each do |work_directory|
-      print_separator(work_directory)
-      ignored_files = []
-      Dir["#{work_directory}/*.pdf"].each do |file|
-        base_name = File.basename(file, File.extname(file))
-        type = settings.match_doc_type(file)
-        unless type
-          ignored_files << base_name
-          next
-        end
-
-        pad = 12
-        puts "Working on #{base_name.colorize(:light_green)}"
-        print_ident 'Type', type.name, :light_blue, width: pad
-        doc = Document.new(file, type)
-        print_ident 'Sub-Type', doc.sub_type, :light_blue, width: pad
-        print_ident 'Period', doc.period, :light_blue, width: pad
-        print_ident 'New Name', doc.new_name, :light_blue, width: pad
-        print_ident 'Store Path', doc.store_path, :light_blue, width: pad
-        print_ident 'Other files', doc.companion_files(join: true), :light_blue, width: pad
-        doc.write_pdf(settings.base_path)
-      end
-
-      puts "\nNo account was matched for these PDF files:" unless ignored_files.empty?
-      ignored_files.each.with_index(1) do |file, index|
-        print_ident index, file, :red
-      end
+    @settings = Settings.new(search_config_file)
+    @settings.scrape_dirs.each do |work_directory|
+      process_directory(work_directory)
     end
   rescue StandardError => e
-    line = e.backtrace[0].match(/:(\d+)/)[1]
-    puts "Error, #{e.message}. #{line}".colorize(:red)
-    exit 1
+    print_error e
   end
+
+  ##
+  # @param [String] work_directory
+  def self.process_directory(work_directory)
+    print_separator work_directory
+    ignored_files = []
+    Dir["#{work_directory}/*.pdf"].each do |pdf_file|
+      type = @settings.match_doc_type(pdf_file)
+      if type
+        process_document(pdf_file, type)
+      else
+        ignored_files << basename_without_ext(pdf_file)
+      end
+    end
+
+    puts "\nNo account was matched for these PDF files:" unless ignored_files.empty?
+    ignored_files.each.with_index(1) { |file, index| print_ident index, file, :magenta }
+  end
+
+  ##
+  # Generate document, and process actions
+  # @param [String] file
+  # @param [Type] type
+  # rubocop:disable Metrics/AbcSize
+  def self.process_document(file, type)
+    puts "Working on #{basename_without_ext(file).colorize(:light_green)}"
+    pad = 12
+    print_ident 'Type', type.name, :light_blue, width: pad
+    doc = Document.new(file, type)
+    print_ident 'Sub-Type', doc.sub_type, :light_blue, width: pad
+    print_ident 'Period', doc.period, :light_blue, width: pad
+    print_ident 'New Name', doc.new_name, :light_blue, width: pad
+    print_ident 'Store Path', doc.store_path, :light_blue, width: pad
+    print_ident 'Other files', doc.companion_files(join: true), :light_blue, width: pad
+    print_ident 'Print CMD', doc.print_cmd, :light_blue, width: pad
+    doc.write_pdf(@settings.base_path)
+  end
+  # rubocop:enable Metrics/AbcSize
 
   def self.print_separator(title)
     _rows, cols = `stty size`.split.map(&:to_i)
@@ -75,5 +85,9 @@ module Pdfh
     end
 
     raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n       within paths: #{dir_order.join(', ')}"
+  end
+
+  def self.basename_without_ext(file)
+    File.basename(file, File.extname(file))
   end
 end

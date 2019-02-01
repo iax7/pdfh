@@ -1,6 +1,7 @@
 ---
 scrape_dirs:
   - ~/Downloads
+  - /this/should/not/exists
 base_path: ~/Files
 document_types:
   - name: Password Protected (test)

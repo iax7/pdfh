@@ -145,4 +145,14 @@ RSpec.describe Pdfh::Document do
       expect(subject.year).to eq(2019)
     end
   end
+
+  context '#print_cmd' do
+    it 'returns nil if string empty' do
+      expect(subject.print_cmd).to be_nil
+    end
+    it 'returns string if not empty' do
+      subject.type.print_cmd = 'command'
+      expect(subject.print_cmd).to eq('command')
+    end
+  end
 end

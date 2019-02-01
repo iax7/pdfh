@@ -8,20 +8,18 @@ module Pdfh
   ##
   # Handles the config yaml data mapping, and associates a file name with a doc type
   class Settings
-    attr_accessor :scrape_dirs, :base_path, :document_types
+    attr_reader :scrape_dirs, :base_path, :document_types
 
     def initialize(file)
       file_hash = YAML.load_file(file)
       Verbose.print "Loaded configuration file: #{file}"
 
-      self.scrape_dirs = file_hash['scrape_dirs'].map do |d|
-        File.expand_path(d)
-      end
-      self.base_path = File.expand_path(file_hash['base_path'])
-      self.document_types = process_doc_types(file_hash['document_types'])
+      @scrape_dirs = process_scrape_dirs(file_hash['scrape_dirs'])
+      @base_path = File.expand_path(file_hash['base_path'])
+      @document_types = process_doc_types(file_hash['document_types'])
 
       Verbose.print 'Processing directories:'
-      scrape_dirs.each { |d| Verbose.print "  - #{d}" }
+      scrape_dirs.each { |dir| Verbose.print "  - #{dir}" }
       Verbose.print
     end
 
@@ -37,6 +35,18 @@ module Pdfh
     end
 
     private
+
+    def process_scrape_dirs(scrape_dirs_list)
+      scrape_dirs_list.map do |dir|
+        expanded = File.expand_path(dir)
+        dir_exists = File.directory?(expanded)
+        if dir_exists
+          expanded
+        else
+          Verbose.print "  ** Directory #{dir} does not exists."
+        end
+      end.compact
+    end
 
     def process_doc_types(doc_types)
       doc_types.map do |x|

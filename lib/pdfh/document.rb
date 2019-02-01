@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 require 'fileutils'
+require 'pdfh/month'
 require 'ext/string'
 
+##
+# main module
 module Pdfh
-  using Pdfh::String
+  using Extensions
 
   ##
   # Handles the PDF detected by the rules
@@ -16,58 +19,40 @@ module Pdfh
   #      @text << page.text
   #  end
   class Document
-    attr_accessor :text, :type, :file, :extra
-
-    MONTHS = {
-      enero: 1,
-      febrero: 2,
-      marzo: 3,
-      abril: 4,
-      mayo: 5,
-      junio: 6,
-      julio: 7,
-      agosto: 8,
-      septiembre: 9,
-      octubre: 10,
-      noviembre: 11,
-      diciembre: 12
-    }.freeze
+    attr_reader :text, :type, :file, :extra
 
     def initialize(file, type, _options = {})
+      raise IOError, "File #{file} not found" unless File.exist?(file)
+
       @file = file
       @type = type
       @month_offset = 0
       @year_offset = 0
 
-      raise IOError, "File #{file} not found" unless File.exist?(file)
-
       Verbose.print "=== Type: #{type_name} =================="
-      @text = pdf_text
-      Verbose.print "  Text extracted: #{@text}"
+      extract_pdf_text
       @sub_type = extract_subtype(@type.sub_types)
       Verbose.print "  SubType: #{@sub_type}"
-      @month, @year, @extra = match_data
-      Verbose.print "==== Assigned: #{@month}, #{@year}, #{@extra} ==( Month, Year, Extra )================"
-      @companion = find_companion_files
+      match_data
+      find_companion_files
     end
 
     def period
-      m = month.to_s.rjust(2, '0')
-      y = year
-      "#{y}-#{m}"
+      formated_month = month.to_s.rjust(2, '0')
+      "#{year}-#{formated_month}"
     end
 
     def month
-      m = normalize_month + @month_offset
+      month = Month.normalize(@month) + @month_offset
 
-      case m
+      case month
       when 0 then
         @year_offset = -1
         12
       when 13 then
         @year_offset = 1
         1
-      else m
+      else month
       end
     end
 
@@ -99,16 +84,22 @@ module Pdfh
     def new_name
       template = @type.to_h.key?(:name_template) ? @type.name_template : '{original}'
       new_name = template
-                 .gsub(/\{original\}/, file_name_only)
-                 .gsub(/\{period\}/, period)
-                 .gsub(/\{type\}/, type_name)
-                 .gsub(/\{subtype\}/, sub_type)
-                 .gsub(/\{extra\}/, extra || '')
+                 .sub('{original}', file_name_only)
+                 .sub('{period}', period)
+                 .sub('{type}', type_name)
+                 .sub('{subtype}', sub_type)
+                 .sub('{extra}', extra || '')
       "#{new_name}.pdf"
     end
 
     def store_path
       @type.store_path.gsub(/\{YEAR\}/, year.to_s)
+    end
+
+    def print_cmd
+      return nil if type.print_cmd.nil? || type.print_cmd.empty?
+
+      type.print_cmd
     end
 
     def to_s
@@ -122,6 +113,7 @@ module Pdfh
         New Name:  #{new_name}
         StorePath: #{store_path}
         Companion: #{companion_files(join: true)}
+        Print Cmd: #{print_cmd}
       STR
     end
 
@@ -147,11 +139,7 @@ module Pdfh
       _result = `#{cmd}`
       raise IOError, "File #{full_path} was not created." unless File.file?(full_path)
 
-      # Making backup of original
-      Dir.chdir(home_dir) do
-        File.rename(file, backup_name)
-      end
-
+      make_document_backup
       copy_companion_files(dir_path)
     end
 
@@ -174,24 +162,14 @@ module Pdfh
       nil
     end
 
-    def normalize_month
-      month_num = @month.to_i
-      return month_num if month_num.positive?
-
-      if @month.size == 3
-        MONTHS.keys.each do |mon|
-          return MONTHS[mon] if mon.to_s[0, 3] == @month
-        end
-      end
-
-      MONTHS[@month.to_sym]
-    end
-
     def home_dir
       File.dirname(@file)
     end
 
-    def pdf_text
+    ##
+    # Gets the text from the pdf in order to execute
+    # the regular expresiom matches
+    def extract_pdf_text
       temp = `mktemp`.chomp
       Verbose.print "  --> #{temp} temporal file assigned."
 
@@ -199,11 +177,12 @@ module Pdfh
       cmd = %(qpdf #{password_opt} --decrypt --stream-data=uncompress '#{@file}' '#{temp}')
       Verbose.print "  Command: #{cmd}"
       _result = `#{cmd}`
-      Verbose.print 'Password removed.'
+      Verbose.print '  Password removed.'
 
       cmd2 = %(pdftotext -enc UTF-8 '#{temp}' -)
       Verbose.print "  Command: #{cmd2}"
-      `#{cmd2}`
+      @text = `#{cmd2}`
+      Verbose.print "  Text extracted: #{@text}"
     end
 
     def match_data
@@ -216,7 +195,18 @@ module Pdfh
       return matched.captures.map(&:downcase) if @type.re_date.named_captures.empty?
 
       extra = matched.captures.size > 2 ? matched[3] : nil
-      [matched[:m].downcase, matched[:y], extra]
+      @month = matched[:m].downcase
+      @year = matched[:y]
+      @extra = extra
+      Verbose.print "==== Assigned: #{@month}, #{@year}, #{@extra} ==( Month, Year, Extra )================"
+    end
+
+    ##
+    # Create a backup of original document
+    def make_document_backup
+      Dir.chdir(home_dir) do
+        File.rename(file, backup_name)
+      end
     end
 
     def find_companion_files
@@ -224,10 +214,10 @@ module Pdfh
       Verbose.print "   Working on dir: #{home_dir}"
       Dir.chdir(home_dir) do
         all_files = Dir["#{file_name_only}.*"]
-        companion = all_files.reject { |f| f.include? 'pdf' }
+        companion = all_files.reject { |file| file.include? 'pdf' }
         Verbose.print "     - #{companion.join(', ')}"
 
-        companion || []
+        @companion = companion || []
       end
     end
 

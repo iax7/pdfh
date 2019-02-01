@@ -4,25 +4,6 @@ require 'pdfh/version'
 require 'pdfh/settings'
 
 RSpec.describe Pdfh do
-  let(:settings_path) { File.expand_path('spec/fixtures/settings.yml') }
-  let(:files) { ['EdoCta (1).pdf', 'dummy.pdf'] }
-  let(:type_cta) do OpenStruct.new({
-      name: 'Cuenta',
-      re_file: Regexp.new('EdoCta( ?\(\d+\))?\.pdf'),
-      re_date: Regexp.new('(\d{2})\/(?<m>\w+)\/(?<y>\d{4})')
-    })
-  end
-  let(:document) do
-    double(:document,
-            type: 'Type',
-            sub_type: 'Sub-Type',
-            period: 'YYYY-MM',
-            new_name: 'New_name.pdf',
-            store_path: 'store_path/YYYY',
-            companion_files: 'N/A',
-            write_pdf: false)
-  end
-
   it 'has a version number' do
     expect(Pdfh::VERSION).not_to be nil
   end
@@ -38,6 +19,26 @@ RSpec.describe Pdfh do
   end
 
   context '#main' do
+    let(:settings_path) { File.expand_path('spec/fixtures/settings.yml') }
+    let(:files) { ['EdoCta (1).pdf', 'dummy.pdf'] }
+    let(:type_cta) do OpenStruct.new({
+        name: 'Cuenta',
+        re_file: Regexp.new('EdoCta( ?\(\d+\))?\.pdf'),
+        re_date: Regexp.new('(\d{2})\/(?<m>\w+)\/(?<y>\d{4})')
+      })
+    end
+    let(:document) do
+      double(:document,
+              type: 'Type',
+              sub_type: 'Sub-Type',
+              period: 'YYYY-MM',
+              new_name: 'New_name.pdf',
+              store_path: 'store_path/YYYY',
+              companion_files: 'N/A',
+              write_pdf: false,
+              print_cmd: 'command -arg1 -arg2')
+    end
+
     before do
       expect(STDOUT).to receive(:puts).and_return(nil).at_least(:once)
     end
@@ -45,6 +46,7 @@ RSpec.describe Pdfh do
     it 'fails to load' do
       expect{ subject.main }.to raise_exception(SystemExit)
     end
+
     it 'loads' do
       expect(subject).to receive(:search_config_file).and_return(settings_path)
       expect(Dir).to receive(:[]).and_return(files)

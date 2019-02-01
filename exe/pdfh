@@ -4,6 +4,7 @@
 require 'optparse'
 require 'pdfh'
 require 'pdfh/version'
+require 'pdfh/utils'
 
 options = {}
 opt = OptionParser.new do |opts|
@@ -24,7 +25,7 @@ end
 begin
   opt.parse!
 rescue OptionParser::InvalidOption => e
-  puts "Error, #{e.message}".colorize(:red)
+  Pdfh.print_error e, exit_app: false
   puts opt
   exit 1
 end

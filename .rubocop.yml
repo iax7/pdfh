@@ -6,3 +6,13 @@ AllCops:
 
 Metrics/LineLength:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - pdfh.gemspec
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Max: 15
