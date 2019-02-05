@@ -2,6 +2,7 @@
 
 require 'fileutils'
 require 'pdfh/month'
+require 'pdfh/pdf_handler'
 require 'ext/string'
 
 ##
@@ -11,13 +12,6 @@ module Pdfh
 
   ##
   # Handles the PDF detected by the rules
-  # TODO: Replace command utils with this gem
-  #  require 'pdf-reader'
-  #
-  #  reader = PDF::Reader.new(temp)
-  #  reader.pages.each do |page|
-  #      @text << page.text
-  #  end
   class Document
     attr_reader :text, :type, :file, :extra
 
@@ -29,12 +23,27 @@ module Pdfh
       @month_offset = 0
       @year_offset = 0
 
+      @pdf_doc = PdfHandler.new(file, @type.pwd)
+
       Verbose.print "=== Type: #{type_name} =================="
-      extract_pdf_text
+      @text = @pdf_doc.extract_text
       @sub_type = extract_subtype(@type.sub_types)
       Verbose.print "  SubType: #{@sub_type}"
-      match_data
+      @month, @year, @extra = match_data
+      Verbose.print "==== Assigned: #{@month}, #{@year}, #{@extra} ==( Month, Year, Extra )================"
       find_companion_files
+    end
+
+    def write_pdf(base_path)
+      full_path = File.join(base_path, store_path, new_name)
+      dir_path = File.join(base_path, store_path)
+
+      @pdf_doc.write_pdf(dir_path, full_path)
+
+      return if Dry.active?
+
+      make_document_backup
+      copy_companion_files(dir_path)
     end
 
     def period
@@ -97,9 +106,10 @@ module Pdfh
     end
 
     def print_cmd
-      return nil if type.print_cmd.nil? || type.print_cmd.empty?
+      return 'N/A' if type.print_cmd.nil? || type.print_cmd.empty?
 
-      type.print_cmd
+      relative_path = File.join(store_path, new_name)
+      "#{type.print_cmd} #{relative_path}"
     end
 
     def to_s
@@ -121,26 +131,6 @@ module Pdfh
       @companion unless join
 
       @companion.empty? ? 'N/A' : @companion.join(', ')
-    end
-
-    def write_pdf(base_path)
-      Verbose.print '~~~~~~~~~~~~~~~~~~ Writing PDFs'
-      full_path = File.join(base_path, store_path, new_name)
-      dir_path = File.join(base_path, store_path)
-
-      raise IOError, "Path #{dir_path} was not found." unless Dir.exist?(dir_path)
-
-      password_opt = "--password='#{@type.pwd}'" if @type.pwd
-      cmd = %(qpdf #{password_opt} --decrypt '#{@file}' '#{full_path}')
-      Verbose.print "  Write pdf command: #{cmd}"
-
-      return if Dry.active?
-
-      _result = `#{cmd}`
-      raise IOError, "File #{full_path} was not created." unless File.file?(full_path)
-
-      make_document_backup
-      copy_companion_files(dir_path)
     end
 
     private
@@ -167,24 +157,9 @@ module Pdfh
     end
 
     ##
-    # Gets the text from the pdf in order to execute
-    # the regular expresiom matches
-    def extract_pdf_text
-      temp = `mktemp`.chomp
-      Verbose.print "  --> #{temp} temporal file assigned."
-
-      password_opt = "--password='#{@type.pwd}'" if @type.pwd
-      cmd = %(qpdf #{password_opt} --decrypt --stream-data=uncompress '#{@file}' '#{temp}')
-      Verbose.print "  Command: #{cmd}"
-      _result = `#{cmd}`
-      Verbose.print '  Password removed.'
-
-      cmd2 = %(pdftotext -enc UTF-8 '#{temp}' -)
-      Verbose.print "  Command: #{cmd2}"
-      @text = `#{cmd2}`
-      Verbose.print "  Text extracted: #{@text}"
-    end
-
+    # named matches can appear in any order with names 'd', 'm' and 'y'
+    # unamed matches needs to be in order month, year
+    # @return [Array] - format [month, year, day]
     def match_data
       Verbose.print '~~~~~~~~~~~~~~~~~~ RegEx'
       Verbose.print "  Using regex: #{@type.re_date}"
@@ -194,11 +169,8 @@ module Pdfh
 
       return matched.captures.map(&:downcase) if @type.re_date.named_captures.empty?
 
-      extra = matched.captures.size > 2 ? matched[3] : nil
-      @month = matched[:m].downcase
-      @year = matched[:y]
-      @extra = extra
-      Verbose.print "==== Assigned: #{@month}, #{@year}, #{@extra} ==( Month, Year, Extra )================"
+      extra = matched.captures.size > 2 ? matched[:d] : nil
+      [matched[:m].downcase, matched[:y], extra]
     end
 
     ##

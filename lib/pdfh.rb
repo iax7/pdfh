@@ -13,6 +13,7 @@ module Pdfh
     Dry.active = options[:dry]
 
     @settings = Settings.new(search_config_file)
+    puts "Destination path: #{@settings.base_path.light_blue}"
     @settings.scrape_dirs.each do |work_directory|
       process_directory(work_directory)
     end

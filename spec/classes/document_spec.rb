@@ -77,25 +77,13 @@ RSpec.describe Pdfh::Document do
   end
 
   context '#write_pdf' do
-    it 'runs Dry' do
-      expect(Dir).to receive(:exist?).and_return(true)
-      expect(Pdfh::Dry).to receive(:active?).and_return(true)
-
-      expect(subject.write_pdf('/tmp')).to eq(nil)
-    end
     it 'writes pdf successfuly' do
-      expect(Dir).to receive(:exist?).and_return(true)
-      expect(subject).to receive(:`).and_return(nil)
-      expect(File).to receive(:file?).with('/tmp/2019/Edo Cuenta/2019-01 Cuenta Enlace.pdf').and_return(true)
+      pdf_handler = double(:pdf_doc, write_pdf: true)
+      subject.instance_variable_set(:@pdf_doc, pdf_handler)
+
       expect(File).to receive(:rename).and_return(true)
       expect(FileUtils).to receive(:cp).and_return(true)
       subject.write_pdf('/tmp')
-    end
-    it 'fail to write pdf' do
-      expect(Dir).to receive(:exist?).and_return(true)
-      expect(subject).to receive(:`).and_return(nil)
-
-      expect{ subject.write_pdf('/tmp') }.to raise_error(IOError)
     end
   end
 
@@ -148,11 +136,41 @@ RSpec.describe Pdfh::Document do
 
   context '#print_cmd' do
     it 'returns nil if string empty' do
-      expect(subject.print_cmd).to be_nil
+      expect(subject.print_cmd).to eq('N/A')
     end
     it 'returns string if not empty' do
       subject.type.print_cmd = 'command'
-      expect(subject.print_cmd).to eq('command')
+      expect(subject.print_cmd).to start_with('command')
+    end
+  end
+
+  context '#match_data (private method)' do
+    let(:text) { 'al 27 de Septiembre de 2018 ' }
+    let(:unamed_re) { /al \d{2} de (\w+) de (\d{4})/ }
+    let(:named_re) { /al (?<d>\d{2}) de (?<m>\w+) de (?<y>\d{4})/ }
+
+    before do
+      subject.instance_variable_set(:@text, text)
+    end
+
+    it 'Regular expresion has unnamed params' do
+      type = double(:type, re_date: unamed_re)
+      subject.instance_variable_set(:@type, type)
+
+      expect(unamed_re.named_captures).to be_empty
+
+      result = subject.instance_eval{ match_data }
+      expect(result).to eq(["septiembre", "2018"])
+    end
+
+    it 'Regular expresion has named params' do
+      type = double(:type, re_date: named_re)
+      subject.instance_variable_set(:@type, type)
+
+      expect(named_re.named_captures).not_to be_empty
+
+      result = subject.instance_eval{ match_data }
+      expect(result).to eq(["septiembre", "2018", "27"])
     end
   end
 end
