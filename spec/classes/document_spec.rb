@@ -62,6 +62,13 @@ RSpec.describe Pdfh::Document do
     expect(subject.new_name).to eq('2019-01 Cuenta Enlace.pdf')
   end
 
+  it 'ReDateError changes messages' do
+    msg = 'Custom error'
+    error = Pdfh::ReDateError.new(msg)
+
+    expect{ raise error }.to raise_error(Pdfh::ReDateError, msg)
+  end
+
   context '#companion_files' do
     it 'has files' do
       res = subject.companion_files(join: true)

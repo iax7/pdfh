@@ -11,6 +11,14 @@ module Pdfh
   using Extensions
 
   ##
+  # Regular Date Error, when there is not match
+  class ReDateError < StandardError
+    def initialize(message = 'No data matched your date regular expression')
+      super(message)
+    end
+  end
+
+  ##
   # Handles the PDF detected by the rules
   class Document
     attr_reader :text, :type, :file, :extra
@@ -165,6 +173,8 @@ module Pdfh
       Verbose.print "  Using regex: #{@type.re_date}"
       Verbose.print "        named:   #{@type.re_date.named_captures}"
       matched = @type.re_date.match(@text)
+      raise ReDateError unless matched
+
       Verbose.print "     captured: #{matched.captures}"
 
       return matched.captures.map(&:downcase) if @type.re_date.named_captures.empty?

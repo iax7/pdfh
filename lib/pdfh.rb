@@ -21,6 +21,21 @@ module Pdfh
     print_error e
   end
 
+  def self.search_config_file
+    name = File.basename($PROGRAM_NAME)
+    names_to_look = ["#{name}.yml", "#{name}.yaml"]
+    dir_order = [Dir.pwd, File.expand_path('~')]
+
+    dir_order.each do |dir|
+      names_to_look.each do |file|
+        f = File.join(dir, file)
+        return f if File.file?(f)
+      end
+    end
+
+    raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n       within paths: #{dir_order.join(', ')}"
+  end
+
   ##
   # @param [String] work_directory
   def self.process_directory(work_directory)
@@ -56,6 +71,8 @@ module Pdfh
     print_ident 'Other files', doc.companion_files(join: true), :light_blue, width: pad
     print_ident 'Print CMD', doc.print_cmd, :light_blue, width: pad
     doc.write_pdf(@settings.base_path)
+  rescue StandardError => err
+    puts "       Doc Error: #{err.message}".colorize(:red)
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -71,21 +88,6 @@ module Pdfh
     field_str = field.to_s.rjust(width)
     value_str = value.colorize(color)
     puts "#{' ' * 4}#{field_str}: #{value_str}"
-  end
-
-  def self.search_config_file
-    name = File.basename($PROGRAM_NAME)
-    names_to_look = ["#{name}.yml", "#{name}.yaml"]
-    dir_order = [Dir.pwd, File.expand_path('~')]
-
-    dir_order.each do |dir|
-      names_to_look.each do |file|
-        f = File.join(dir, file)
-        return f if File.file?(f)
-      end
-    end
-
-    raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n       within paths: #{dir_order.join(', ')}"
   end
 
   def self.basename_without_ext(file)
