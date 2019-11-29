@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     pdfh (0.1.5)
-      colorize (~> 0.8.1)
+      colorize (~> 0.8.0)
 
 GEM
   remote: https://rubygems.org/
@@ -11,42 +11,44 @@ GEM
     colorize (0.8.1)
     diff-lcs (1.3)
     docile (1.3.2)
-    hirb (0.7.3)
     json (2.2.0)
-    rake (10.5.0)
-    rspec (3.8.0)
-      rspec-core (~> 3.8.0)
-      rspec-expectations (~> 3.8.0)
-      rspec-mocks (~> 3.8.0)
-    rspec-core (3.8.2)
-      rspec-support (~> 3.8.0)
-    rspec-expectations (3.8.4)
+    rake (13.0.1)
+    rspec (3.9.0)
+      rspec-core (~> 3.9.0)
+      rspec-expectations (~> 3.9.0)
+      rspec-mocks (~> 3.9.0)
+    rspec-core (3.9.0)
+      rspec-support (~> 3.9.0)
+    rspec-expectations (3.9.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.8.0)
-    rspec-mocks (3.8.1)
+      rspec-support (~> 3.9.0)
+    rspec-mocks (3.9.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.8.0)
-    rspec-support (3.8.2)
-    simplecov (0.16.1)
+      rspec-support (~> 3.9.0)
+    rspec-support (3.9.0)
+    simplecov (0.17.1)
       docile (~> 1.1)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
-    simplecov-console (0.4.2)
+    simplecov-console (0.6.0)
       ansi
-      hirb
       simplecov
+      terminal-table
     simplecov-html (0.10.2)
+    terminal-table (1.8.0)
+      unicode-display_width (~> 1.1, >= 1.1.1)
+    unicode-display_width (1.6.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.17.2)
+  bundler (~> 2.0)
   pdfh!
-  rake (~> 10.0)
+  rake (~> 13.0)
   rspec (~> 3.0)
-  simplecov (~> 0.16.1)
-  simplecov-console (~> 0.4.2)
+  simplecov (~> 0.17.0)
+  simplecov-console (~> 0.6.0)
 
 BUNDLED WITH
-   1.17.2
+   2.0.2
