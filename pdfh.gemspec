@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Examine all PDF files in scrape directories, remove password (if has one), rename and copy to a new directory using regular expresions.'
   spec.homepage      = 'https://github.com/iax7/pdfh'
   spec.license       = 'MIT'
-  spec.required_ruby_version = '>= 2.7.0'
+  spec.required_ruby_version = '>= 2.5.0'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
