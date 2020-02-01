@@ -46,6 +46,8 @@ module Pdfh
       full_path = File.join(base_path, store_path, new_name)
       dir_path = File.join(base_path, store_path)
 
+      FileUtils.mkdir_p(dir_path) unless File.exist?(dir_path)
+
       @pdf_doc.write_pdf(dir_path, full_path)
 
       return if Dry.active?

@@ -24,7 +24,7 @@ document_types:
     pwd: base64string                     # [OPTIONAL] Password if the document is protected
     store_path: "{YEAR}/bank_docs"        # Relative path to copy this document
     name_template: '{period} {subtype}'   # Template for new filename when copied
-    sub_types:                            # [OPTIONAL] In case your need an extra category 
+    sub_types:                            # [OPTIONAL] In case your need an extra category
       - name: Account1                       # Regular expresion to match this subtype
         month_offset: -1                     # [OPTIONAL] Integer value to adjust month
 ```
@@ -33,9 +33,12 @@ document_types:
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `rake install`. To release a new version, run `rake bump`, and then run `rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ```bash
+rake install
+
+# step by step
 build pdfh.gemspec
 gem install pdfh-*
 ```
