@@ -65,10 +65,10 @@ module Pdfh
       month = Month.normalize(@month) + @month_offset
 
       case month
-      when 0 then
+      when 0
         @year_offset = -1
         12
-      when 13 then
+      when 13
         @year_offset = 1
         1
       else month

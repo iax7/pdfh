@@ -33,7 +33,8 @@ module Pdfh
       end
     end
 
-    raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n       within paths: #{dir_order.join(', ')}"
+    raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n"\
+                         "       within paths: #{dir_order.join(', ')}"
   end
 
   ##
@@ -71,8 +72,8 @@ module Pdfh
     print_ident 'Other files', doc.companion_files(join: true), :light_blue, width: pad
     print_ident 'Print CMD', doc.print_cmd, :light_blue, width: pad
     doc.write_pdf(@settings.base_path)
-  rescue StandardError => err
-    puts "       Doc Error: #{err.message}".colorize(:red)
+  rescue StandardError => e
+    puts "       Doc Error: #{e.message}".colorize(:red)
   end
   # rubocop:enable Metrics/AbcSize
 

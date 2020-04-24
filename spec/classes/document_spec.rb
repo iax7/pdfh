@@ -27,7 +27,7 @@ RSpec.describe Pdfh::Document do
       expect(subject.month).to eq(1)
     end
     it 'fails when does not exists' do
-      expect{ described_class.new('/does_not_exists.pdf', cuenta_type) }.to raise_error(IOError)
+      expect { described_class.new('/does_not_exists.pdf', cuenta_type) }.to raise_error(IOError)
     end
   end
 
@@ -66,7 +66,7 @@ RSpec.describe Pdfh::Document do
     msg = 'Custom error'
     error = Pdfh::ReDateError.new(msg)
 
-    expect{ raise error }.to raise_error(Pdfh::ReDateError, msg)
+    expect { raise error }.to raise_error(Pdfh::ReDateError, msg)
   end
 
   context '#companion_files' do
@@ -166,7 +166,7 @@ RSpec.describe Pdfh::Document do
 
       expect(unamed_re.named_captures).to be_empty
 
-      result = subject.instance_eval{ match_data }
+      result = subject.instance_eval { match_data }
       expect(result).to eq(["septiembre", "2018"])
     end
 
@@ -176,7 +176,7 @@ RSpec.describe Pdfh::Document do
 
       expect(named_re.named_captures).not_to be_empty
 
-      result = subject.instance_eval{ match_data }
+      result = subject.instance_eval { match_data }
       expect(result).to eq(["septiembre", "2018", "27"])
     end
   end

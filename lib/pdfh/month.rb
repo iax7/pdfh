@@ -29,7 +29,7 @@ module Pdfh
 
       # When param is a 3 char month: 'mar', 'nov'
       if month.size == 3
-        MONTHS.keys.each do |mon|
+        MONTHS.each_key do |mon|
           return MONTHS[mon] if mon.to_s[0, 3] == month
         end
       end

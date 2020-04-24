@@ -44,7 +44,7 @@ RSpec.describe Pdfh do
     end
 
     it 'fails to load' do
-      expect{ subject.main }.to raise_exception(SystemExit)
+      expect { subject.main }.to raise_exception(SystemExit)
     end
 
     it 'loads' do

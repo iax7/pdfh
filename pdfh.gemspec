@@ -11,7 +11,8 @@ Gem::Specification.new do |spec|
   spec.email         = ['iax7@users.noreply.github.com']
 
   spec.summary       = 'Organize PDF files'
-  spec.description   = 'Examine all PDF files in scrape directories, remove password (if has one), rename and copy to a new directory using regular expresions.'
+  spec.description   = 'Examine all PDF files in scrape directories, remove password (if has one), '\
+                       'rename and copy to a new directory using regular expresions.'
   spec.homepage      = 'https://github.com/iax7/pdfh'
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 2.5.0'
@@ -41,10 +42,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'colorize', '~> 0.8.0'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
-  spec.add_development_dependency 'pry', '~> 0.12.0'
+  spec.add_development_dependency 'pry'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'simplecov', '~> 0.17.0'
-  spec.add_development_dependency 'simplecov-console', '~> 0.6.0'
-  spec.add_development_dependency 'versionomy', '~> 0.5'
+  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'simplecov-console'
+  spec.add_development_dependency 'versionomy'
 end
