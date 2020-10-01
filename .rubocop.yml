@@ -1,18 +1,11 @@
----
+inherit_from: .rubocop_todo.yml
+
 AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.5
   Exclude:
     - '.git/**/*'
     - 'spec/**/*'
 
-Metrics/LineLength:
-  Enabled: false
 
-Metrics/BlockLength:
-  Exclude:
-    - pdfh.gemspec
 
-Metrics/MethodLength:
-  Max: 15
-
-Metrics/AbcSize:
-  Max: 15

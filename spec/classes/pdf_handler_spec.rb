@@ -29,7 +29,7 @@ RSpec.describe Pdfh::PdfHandler do
       expect(Dir).to receive(:exist?).and_return(true)
       expect(subject).to receive(:`).and_return(nil)
 
-      expect{ subject.write_pdf(dir_path, full_path) }.to raise_error(IOError)
+      expect { subject.write_pdf(dir_path, full_path) }.to raise_error(IOError)
     end
   end
 end
