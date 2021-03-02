@@ -30,4 +30,14 @@ rescue OptionParser::InvalidOption => e
   exit 1
 end
 
+def validate_installed(app)
+  require "open3"
+  _stdout, _stderr, status = Open3.capture3("command -v #{app}")
+  puts "Missing #{app} command." unless status.success?
+
+  status.success?
+end
+
+exit(1) unless validate_installed("qpdf") && validate_installed("pdftotext")
+
 Pdfh.main(options)
