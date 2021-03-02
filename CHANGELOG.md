@@ -1,3 +1,6 @@
+## v0.1.9
+* Add dependencies validation at run
+
 ## v0.1.5
 * Add print_cmd field in config file for information purposes
 * Settings now validates a no existing directory
