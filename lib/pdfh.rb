@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'pdfh/version'
-require 'pdfh/settings'
-require 'pdfh/document'
-require 'pdfh/utils'
+require "pdfh/version"
+require "pdfh/settings"
+require "pdfh/document"
+require "pdfh/utils"
 
 ##
 # Gem entry point
@@ -24,7 +24,7 @@ module Pdfh
   def self.search_config_file
     name = File.basename($PROGRAM_NAME)
     names_to_look = ["#{name}.yml", "#{name}.yaml"]
-    dir_order = [Dir.pwd, File.expand_path('~')]
+    dir_order = [Dir.pwd, File.expand_path("~")]
 
     dir_order.each do |dir|
       names_to_look.each do |file|
@@ -33,8 +33,8 @@ module Pdfh
       end
     end
 
-    raise StandardError, "no configuraton file (#{names_to_look.join(' or ')}) was found\n"\
-                         "       within paths: #{dir_order.join(', ')}"
+    raise StandardError, "no configuraton file (#{names_to_look.join(" or ")}) was found\n"\
+                         "       within paths: #{dir_order.join(", ")}"
   end
 
   ##
@@ -63,14 +63,14 @@ module Pdfh
   def self.process_document(file, type)
     puts "Working on #{basename_without_ext(file).colorize(:light_green)}"
     pad = 12
-    print_ident 'Type', type.name, :light_blue, width: pad
+    print_ident "Type", type.name, :light_blue, width: pad
     doc = Document.new(file, type)
-    print_ident 'Sub-Type', doc.sub_type, :light_blue, width: pad
-    print_ident 'Period', doc.period, :light_blue, width: pad
-    print_ident 'New Name', doc.new_name, :light_blue, width: pad
-    print_ident 'Store Path', doc.store_path, :light_blue, width: pad
-    print_ident 'Other files', doc.companion_files(join: true), :light_blue, width: pad
-    print_ident 'Print CMD', doc.print_cmd, :light_blue, width: pad
+    print_ident "Sub-Type", doc.sub_type, :light_blue, width: pad
+    print_ident "Period", doc.period, :light_blue, width: pad
+    print_ident "New Name", doc.new_name, :light_blue, width: pad
+    print_ident "Store Path", doc.store_path, :light_blue, width: pad
+    print_ident "Other files", doc.companion_files(join: true), :light_blue, width: pad
+    print_ident "Print CMD", doc.print_cmd, :light_blue, width: pad
     doc.write_pdf(@settings.base_path)
   rescue StandardError => e
     puts "       Doc Error: #{e.message}".colorize(:red)
@@ -79,16 +79,16 @@ module Pdfh
 
   def self.print_separator(title)
     _rows, cols = `stty size`.split.map(&:to_i)
-    sep = "\n#{'-' * 40} #{title} "
+    sep = "\n#{"-" * 40} #{title} "
     remaining_cols = cols - sep.size
-    sep += '-' * remaining_cols if remaining_cols.positive?
+    sep += "-" * remaining_cols if remaining_cols.positive?
     puts sep.colorize(:light_yellow)
   end
 
   def self.print_ident(field, value, color = :green, width: 3)
     field_str = field.to_s.rjust(width)
     value_str = value.colorize(color)
-    puts "#{' ' * 4}#{field_str}: #{value_str}"
+    puts "#{" " * 4}#{field_str}: #{value_str}"
   end
 
   def self.basename_without_ext(file)

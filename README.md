@@ -8,6 +8,15 @@ Examine all PDF files in scrape directories, remove password (if has one), renam
 gem install pdfh
 ```
 
+### Dependencies
+
+You need to install pdf handling dependencies in order to use this gem. (I have only tested it on macOS)
+
+```bash
+brew install qpdf
+brew install xpdf
+```
+
 ## Usage
 
 After installing this gem you need to create your configuration file on your home folder.

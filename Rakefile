@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require 'colorize'
-require 'bundler/gem_tasks'
-require 'rspec/core/rake_task'
-require 'versionomy'
+require "colorize"
+require "bundler/gem_tasks"
+require "rspec/core/rake_task"
+require "versionomy"
 
 RSpec::Core::RakeTask.new(:spec)
 
 task default: :spec
 
-desc 'Bump gem version number (tiny|minor|major)'
+desc "Bump gem version number (tiny|minor|major)"
 task :bump, :type do |_t, args|
   args.with_defaults(type: :tiny)
-  version_file = File.join(__dir__, 'lib', 'pdfh', 'version.rb')
+  version_file = File.join(__dir__, "lib", "pdfh", "version.rb")
   content = File.read(version_file)
 
   version_pattern = /(?<major>\d+)\.(?<minor>\d+)\.(?<tiny>\d+)/

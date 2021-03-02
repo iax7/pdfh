@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'fileutils'
-require 'pdfh/month'
-require 'pdfh/pdf_handler'
-require 'ext/string'
+require "fileutils"
+require "pdfh/month"
+require "pdfh/pdf_handler"
+require "ext/string"
 
 ##
 # main module
@@ -13,7 +13,7 @@ module Pdfh
   ##
   # Regular Date Error, when there is not match
   class ReDateError < StandardError
-    def initialize(message = 'No data matched your date regular expression')
+    def initialize(message = "No data matched your date regular expression")
       super(message)
     end
   end
@@ -57,7 +57,7 @@ module Pdfh
     end
 
     def period
-      formated_month = month.to_s.rjust(2, '0')
+      formated_month = month.to_s.rjust(2, "0")
       "#{year}-#{formated_month}"
     end
 
@@ -93,21 +93,21 @@ module Pdfh
     end
 
     def type_name
-      @type ? @type.name.titleize : 'N/A'
+      @type ? @type.name.titleize : "N/A"
     end
 
     def sub_type
-      @sub_type ? @sub_type.name.titleize : 'N/A'
+      @sub_type ? @sub_type.name.titleize : "N/A"
     end
 
     def new_name
-      template = @type.to_h.key?(:name_template) ? @type.name_template : '{original}'
+      template = @type.to_h.key?(:name_template) ? @type.name_template : "{original}"
       new_name = template
-                 .sub('{original}', file_name_only)
-                 .sub('{period}', period)
-                 .sub('{type}', type_name)
-                 .sub('{subtype}', sub_type)
-                 .sub('{extra}', extra || '')
+                 .sub("{original}", file_name_only)
+                 .sub("{period}", period)
+                 .sub("{type}", type_name)
+                 .sub("{subtype}", sub_type)
+                 .sub("{extra}", extra || "")
       "#{new_name}.pdf"
     end
 
@@ -116,7 +116,7 @@ module Pdfh
     end
 
     def print_cmd
-      return 'N/A' if type.print_cmd.nil? || type.print_cmd.empty?
+      return "N/A" if type.print_cmd.nil? || type.print_cmd.empty?
 
       relative_path = File.join(store_path, new_name)
       "#{type.print_cmd} #{relative_path}"
@@ -140,19 +140,19 @@ module Pdfh
     def companion_files(join: false)
       @companion unless join
 
-      @companion.empty? ? 'N/A' : @companion.join(', ')
+      @companion.empty? ? "N/A" : @companion.join(", ")
     end
 
     private
 
     ##
-    # @param [Array] subtypes
+    # @param sub_types [Array]
     # @return [OpenStruct]
     def extract_subtype(sub_types)
       return nil if sub_types.nil? || sub_types.empty?
 
       sub_types.each do |st|
-        is_matched = Regexp.new(st['name']).match?(@text)
+        is_matched = Regexp.new(st["name"]).match?(@text)
         next unless is_matched
 
         sub = OpenStruct.new(st)
@@ -171,7 +171,7 @@ module Pdfh
     # unamed matches needs to be in order month, year
     # @return [Array] - format [month, year, day]
     def match_data
-      Verbose.print '~~~~~~~~~~~~~~~~~~ RegEx'
+      Verbose.print "~~~~~~~~~~~~~~~~~~ RegEx"
       Verbose.print "  Using regex: #{@type.re_date}"
       Verbose.print "        named:   #{@type.re_date.named_captures}"
       matched = @type.re_date.match(@text)
@@ -194,24 +194,24 @@ module Pdfh
     end
 
     def find_companion_files
-      Verbose.print '~~~~~~~~~~~~~~~~~~ Searching Companion files'
+      Verbose.print "~~~~~~~~~~~~~~~~~~ Searching Companion files"
       Verbose.print "   Working on dir: #{home_dir}"
       Dir.chdir(home_dir) do
         all_files = Dir["#{file_name_only}.*"]
-        companion = all_files.reject { |file| file.include? 'pdf' }
-        Verbose.print "     - #{companion.join(', ')}"
+        companion = all_files.reject { |file| file.include? "pdf" }
+        Verbose.print "     - #{companion.join(", ")}"
 
         @companion = companion || []
       end
     end
 
     def copy_companion_files(destination)
-      Verbose.print '~~~~~~~~~~~~~~~~~~ Writing Companion files'
+      Verbose.print "~~~~~~~~~~~~~~~~~~ Writing Companion files"
       @companion.each do |file|
         Verbose.print "  Working on #{file}..."
         src_name = File.join(home_dir, file)
         src_ext = File.extname(file)
-        dest_name = File.basename(new_name, '.pdf')
+        dest_name = File.basename(new_name, ".pdf")
         dest_full = File.join(destination, "#{dest_name}#{src_ext}")
         Verbose.print "    cp #{src_name} --> #{dest_full}"
         FileUtils.cp(src_name, dest_full)

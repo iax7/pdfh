@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'colorize'
+require "colorize"
 
 # Contains all generic short functionality
 module Pdfh
@@ -15,7 +15,7 @@ module Pdfh
         @active
       end
 
-      def print(msg = '')
+      def print(msg = "")
         puts msg.colorize(:cyan) if active?
       end
     end

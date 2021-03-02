@@ -38,7 +38,7 @@ module Pdfh
     end
 
     def write_pdf(dir_path, full_path)
-      Verbose.print '~~~~~~~~~~~~~~~~~~ Writing PDFs'
+      Verbose.print "~~~~~~~~~~~~~~~~~~ Writing PDFs"
       raise IOError, "Path #{dir_path} not found." unless Dir.exist?(dir_path)
 
       password_opt = "--password='#{@password}'" if @password

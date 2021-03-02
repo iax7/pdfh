@@ -7,7 +7,7 @@ module Extensions
   # Adds new functionality to string Class
   refine String do
     def titleize
-      split.map(&:capitalize).join(' ')
+      split.map(&:capitalize).join(" ")
     end
   end
 end

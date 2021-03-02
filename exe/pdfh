@@ -1,22 +1,22 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'optparse'
-require 'pdfh'
-require 'pdfh/version'
-require 'pdfh/utils'
+require "optparse"
+require "pdfh"
+require "pdfh/version"
+require "pdfh/utils"
 
 options = {}
 opt = OptionParser.new do |opts|
   # Process ARGV
   opts.banner = "Usage: #{opts.program_name} [options]"
-  opts.on('-v', '--verbose', 'Show more output, useful for debug') { |o| options[:verbose] = o }
-  opts.on('-d', '--dry', 'Dry run, does not write new pdf') { |o| options[:dry] = o }
-  opts.on_tail('-V', '--version', 'Show version') do
+  opts.on("-v", "--verbose", "Show more output, useful for debug") { |o| options[:verbose] = o }
+  opts.on("-d", "--dry", "Dry run, does not write new pdf") { |o| options[:dry] = o }
+  opts.on_tail("-V", "--version", "Show version") do
     puts "#{opts.program_name} v#{Pdfh::VERSION}"
     exit
   end
-  opts.on_tail('-h', '--help', 'Show this message') do
+  opts.on_tail("-h", "--help", "Show this message") do
     puts opts
     exit
   end

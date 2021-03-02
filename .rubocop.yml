@@ -4,8 +4,18 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 2.5
   Exclude:
-    - '.git/**/*'
-    - 'spec/**/*'
+    - pkg/**/*
+    - tmp/**/*
 
+Layout/LineLength:
+  Max: 120
+  IgnoredPatterns: ['^\s*#']
 
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  Enabled: true
+  EnforcedStyle: double_quotes
 

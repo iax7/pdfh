@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'yaml'
-require 'ostruct'
-require 'base64'
+require "yaml"
+require "ostruct"
+require "base64"
 
 module Pdfh
   ##
@@ -14,11 +14,11 @@ module Pdfh
       file_hash = YAML.load_file(file)
       Verbose.print "Loaded configuration file: #{file}"
 
-      @scrape_dirs = process_scrape_dirs(file_hash['scrape_dirs'])
-      @base_path = File.expand_path(file_hash['base_path'])
-      @document_types = process_doc_types(file_hash['document_types'])
+      @scrape_dirs = process_scrape_dirs(file_hash["scrape_dirs"])
+      @base_path = File.expand_path(file_hash["base_path"])
+      @document_types = process_doc_types(file_hash["document_types"])
 
-      Verbose.print 'Processing directories:'
+      Verbose.print "Processing directories:"
       scrape_dirs.each { |dir| Verbose.print "  - #{dir}" }
       Verbose.print
     end
