@@ -9,8 +9,10 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 2.5
   Exclude:
+    - doc/**/*
     - pkg/**/*
     - tmp/**/*
+    - vendor/**/*
 
 Layout/LineLength:
   Max: 120

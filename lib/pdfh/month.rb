@@ -2,7 +2,7 @@
 
 module Pdfh
   ##
-  # Handles Month convertions
+  # Handles Month conversions
   class Month
     MONTHS = {
       enero: 1,

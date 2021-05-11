@@ -6,6 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "bundler", "~> 2.0"
+gem "code-scanning-rubocop", "~> 0.5"
 gem "pry", "~> 0.14"
 gem "rake", "~> 13.0"
 gem "rspec", "~> 3.9"
