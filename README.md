@@ -3,7 +3,7 @@
 [![Rubocop](https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml/badge.svg)](https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml)
 [![Ruby][ruby-badge]][ruby-url]
 
-Examine all PDF files in scrape directories, remove password (if has one), rename and copy to a new directory using regular expresions.
+Examine all PDF files in Look up directories, remove password (if has one), rename and copy to a new directory using regular expresions.
 
 ## Installation
 
@@ -26,9 +26,9 @@ After installing this gem you need to create your configuration file on your hom
 `pdfh.yml`
 ```yaml
 ---
-scrape_dirs:       # Directories where all pdf's are going to be analyzed
+lookup_dirs:       # Directories where all pdf's are going to be analyzed
   - ~/Downloads
-base_path: ~/PDFs  # Directory where all matching documents will be copied
+destination_base_path: ~/PDFs  # Directory where all matching documents will be copied (MUST exist)
 document_types:
   - name: Document From Bank              # Description
     re_file: '.*MyBankReg\.pdf'           # Regular expression to match its filename
@@ -38,7 +38,7 @@ document_types:
     name_template: '{period} {subtype}'   # Template for new filename when copied
     sub_types:                            # [OPTIONAL] In case your need an extra category
       - name: Account1                       # Regular expresion to match this subtype
-        month_offset: -1                     # [OPTIONAL] Integer value to adjust month
+        month_offset: -1                     # [OPTIONAL] Integer (signed) value to adjust month
 ```
 
 ## Development

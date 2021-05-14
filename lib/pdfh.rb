@@ -1,97 +1,134 @@
 # frozen_string_literal: true
 
-require "pdfh/version"
-require "pdfh/settings"
-require "pdfh/document"
-require "pdfh/utils"
+require "ext/string"
+require "colorize"
 
-##
+require "pdfh/version"
+require "pdfh/document_period"
+require "pdfh/document_type"
+require "pdfh/document"
+require "pdfh/month"
+require "pdfh/opt_parser"
+require "pdfh/pdf_handler"
+require "pdfh/settings"
+require "pdfh/settings_template"
+require "pdfh/document_processor"
+
 # Gem entry point
 module Pdfh
-  def self.main(options = {})
-    Verbose.active = options[:verbose]
-    Dry.active = options[:dry]
+  # Settings not found
+  class SettingsIOError < StandardError; end
 
-    @settings = Settings.new(search_config_file)
-    puts "Destination path: #{@settings.base_path.light_blue}"
-    @settings.scrape_dirs.each do |work_directory|
-      process_directory(work_directory)
+  # Regular Date Error, when there is not match
+  class ReDateError < StandardError
+    def initialize(msg = "No data matched your date regular expression")
+      super
     end
-  rescue StandardError => e
-    print_error e
   end
 
-  def self.search_config_file
-    name = File.basename($PROGRAM_NAME)
-    names_to_look = ["#{name}.yml", "#{name}.yaml"]
-    dir_order = [Dir.pwd, File.expand_path("~")]
+  class << self
+    attr_writer :verbose, :dry
 
-    dir_order.each do |dir|
-      names_to_look.each do |file|
-        f = File.join(dir, file)
-        return f if File.file?(f)
+    # @return [Boolean]
+    def verbose?
+      @verbose
+    end
+
+    # @return [Boolean]
+    def dry?
+      @dry
+    end
+
+    # Returns rows, cols
+    # TODO: review https://gist.github.com/nixpulvis/6025433
+    # @return [Array<Integer, Integer>]
+    def console_size
+      `stty size`.split.map(&:to_i)
+    end
+
+    # Prints visual separator in shell for easier reading for humans
+    # @example output
+    #   [Title Text] -----------------------
+    # @param msg [String]
+    # @return [void]
+    def headline(msg)
+      _, cols = console_size
+      line_length = cols - (msg.size + 5)
+      left  = "\033[31m#{"—" * 3}\033[0m"
+      right = "\033[31m#{"—" * line_length}\033[0m"
+      puts "\n#{left} \033[1;34m#{msg}\033[0m #{right}"
+    end
+
+    # @param msg [Object]
+    # @return [void]
+    def verbose_print(msg = nil)
+      puts msg.to_s.colorize(:cyan) if verbose?
+    end
+
+    # @param message [String]
+    # @param exit_app [Boolean] exit application if true (default)
+    # @return [void]
+    def error_print(message, exit_app: true)
+      puts "Error, #{message}".colorize(:red)
+      exit 1 if exit_app
+    end
+
+    # @param message [String]
+    # @return [void]
+    def warn_print(message)
+      puts message.colorize(:yellow)
+    end
+
+    # @return [void]
+    def ident_print(field, value, color: :green, width: 3)
+      field_str = field.to_s.rjust(width)
+      value_str = value.colorize(color)
+      puts "#{" " * 4}#{field_str}: #{value_str}"
+    end
+
+    # @return [Hash]
+    def parse_argv
+      options = {}
+      OPT_PARSER.parse!(into: options)
+      options[:files] = ARGV if ARGV.any?
+      options.transform_keys { |key| key.to_s.tr("-", "_").to_sym }
+    rescue OptionParser::InvalidOption => e
+      error_print e.message, exit_app: false
+      puts OPT_PARSER.help
+      exit 1
+    end
+
+    # @return [String]
+    def config_file_name
+      File.basename($PROGRAM_NAME)
+    end
+
+    # @return [void]
+    def create_settings_file
+      full_path = File.join(File.expand_path("~"), "#{config_file_name}.yml")
+      return if File.exist?(full_path) # double check
+
+      File.open(full_path, "w") do |f|
+        f.write Pdfh::SETTINGS_TEMPLATE.to_yaml
       end
+      puts "Settings #{full_path.inspect.colorize(:green)} was created."
     end
 
-    raise StandardError, "no configuraton file (#{names_to_look.join(" or ")}) was found\n"\
-                         "       within paths: #{dir_order.join(", ")}"
-  end
+    # @raise [SettingsIOError] if no file is found
+    # @return [String]
+    def search_config_file
+      names_to_look = %W[#{config_file_name}.yml #{config_file_name}.yaml]
+      dir_order = [Dir.pwd, File.expand_path("~")]
 
-  ##
-  # @param [String] work_directory
-  def self.process_directory(work_directory)
-    print_separator work_directory
-    ignored_files = []
-    Dir["#{work_directory}/*.pdf"].each do |pdf_file|
-      type = @settings.match_doc_type(pdf_file)
-      if type
-        process_document(pdf_file, type)
-      else
-        ignored_files << basename_without_ext(pdf_file)
+      dir_order.each do |dir|
+        names_to_look.each do |file|
+          path = File.join(dir, file)
+          return path if File.exist?(path)
+        end
       end
+
+      raise SettingsIOError, "no configuration file (#{names_to_look.join(" or ")}) was found\n"\
+                               "       within paths: #{dir_order.join(", ")}"
     end
-
-    puts "\nNo account was matched for these PDF files:" unless ignored_files.empty?
-    ignored_files.each.with_index(1) { |file, index| print_ident index, file, :magenta }
-  end
-
-  ##
-  # Generate document, and process actions
-  # @param [String] file
-  # @param [Type] type
-  # rubocop:disable Metrics/AbcSize
-  def self.process_document(file, type)
-    puts "Working on #{basename_without_ext(file).colorize(:light_green)}"
-    pad = 12
-    print_ident "Type", type.name, :light_blue, width: pad
-    doc = Document.new(file, type)
-    print_ident "Sub-Type", doc.sub_type, :light_blue, width: pad
-    print_ident "Period", doc.period, :light_blue, width: pad
-    print_ident "New Name", doc.new_name, :light_blue, width: pad
-    print_ident "Store Path", doc.store_path, :light_blue, width: pad
-    print_ident "Other files", doc.companion_files(join: true), :light_blue, width: pad
-    print_ident "Print CMD", doc.print_cmd, :light_blue, width: pad
-    doc.write_pdf(@settings.base_path)
-  rescue StandardError => e
-    puts "       Doc Error: #{e.message}".colorize(:red)
-  end
-  # rubocop:enable Metrics/AbcSize
-
-  def self.print_separator(title)
-    _rows, cols = `stty size`.split.map(&:to_i)
-    sep = "\n#{"-" * 40} #{title} "
-    remaining_cols = cols - sep.size
-    sep += "-" * remaining_cols if remaining_cols.positive?
-    puts sep.colorize(:light_yellow)
-  end
-
-  def self.print_ident(field, value, color = :green, width: 3)
-    field_str = field.to_s.rjust(width)
-    value_str = value.colorize(color)
-    puts "#{" " * 4}#{field_str}: #{value_str}"
-  end
-
-  def self.basename_without_ext(file)
-    File.basename(file, File.extname(file))
   end
 end

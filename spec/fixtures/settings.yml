@@ -1,8 +1,8 @@
 ---
-scrape_dirs:
+lookup_dirs:
   - ~/Downloads
   - /this/should/not/exists
-base_path: ~/Files
+destination_base_path: /tmp
 document_types:
   - name: Password Protected (test)
     re_file: '.*EstadodeCuenta\.pdf'

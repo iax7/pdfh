@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-##
-# Extends String class when required
-module Extensions
-  ##
-  # Adds new functionality to string Class
-  refine String do
-    def titleize
-      split.map(&:capitalize).join(" ")
-    end
+# Adds :titleize to string Class
+class String
+  # @return [String]
+  def titleize
+    split.map(&:capitalize).join(" ")
   end
 end
