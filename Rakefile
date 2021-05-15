@@ -12,6 +12,7 @@ task default: :spec
 desc "Bump gem version number (tiny|minor|major)"
 task :bump, :type do |_t, args|
   args.with_defaults(type: :tiny)
+
   version_file = File.join(__dir__, "lib", "pdfh", "version.rb")
   content = File.read(version_file)
 
@@ -22,4 +23,6 @@ task :bump, :type do |_t, args|
   File.write(version_file, content.gsub(version_pattern, "\\1#{next_version}\\3"))
 
   puts "Successfully bumped from #{current_version.to_s.red} to #{next_version.green}"
+  puts "\n> Building v#{next_version.green}..."
+  puts `rake build`
 end

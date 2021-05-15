@@ -1,3 +1,5 @@
+*.yml
+
 .yardoc/
 _yardoc/
 coverage/

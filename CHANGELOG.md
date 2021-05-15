@@ -1,3 +1,13 @@
+## v0.2.0
+* Major gem refactoring
+* Changed setting `base_path` to `destination_base_path`
+* Add DocumentType listing option on executable file
+* Add process individual documents providing type and files
+  ```bash
+  pdfh -t document_type_id path/to_files.pdf
+  ```
+* Add settings.yml template in order to create a sample file
+
 ## v0.1.9
 * Add dependencies validation at run
 
