@@ -11,7 +11,7 @@ module Pdfh
       Pdfh.verbose = options[:verbose]
       Pdfh.dry = options[:dry]
       Pdfh.verbose_print(options)
-      @mode = options.key?(:type) ? :file : :directory
+      Pdfh.mode = options.key?(:type) ? :file : :directory
     end
 
     # @return [void]
@@ -19,7 +19,7 @@ module Pdfh
       @settings = Settings.new(Pdfh.search_config_file)
       puts "Destination path: #{@settings.base_path.colorize(:light_blue)}" if Pdfh.verbose?
 
-      @mode == :file ? process_files : process_lookup_dirs
+      Pdfh.file_mode? ? process_files : process_lookup_dirs
     rescue SettingsIOError => e
       Pdfh.error_print(e.message, exit_app: false)
       Pdfh.create_settings_file
@@ -53,6 +53,7 @@ module Pdfh
       raise ArgumentError, "No files provided to process #{type_id.inspect} type." unless options[:files]
 
       type = doc_type_by_id(type_id)
+      Pdfh.error_print "Type #{type_id.inspect} was not found." if type.nil?
       puts
       options[:files].each do |file|
         unless File.exist?(file)
@@ -109,7 +110,7 @@ module Pdfh
       Pdfh.ident_print "Type", type.name, color: :light_blue, width: pad
       doc = Document.new(file, type)
       Pdfh.ident_print "Sub-Type", doc.sub_type, color: :light_blue, width: pad
-      Pdfh.ident_print "Period", doc.period, color: :light_blue, width: pad
+      Pdfh.ident_print "Period", doc.period.to_s, color: :light_blue, width: pad
       Pdfh.ident_print "New Name", doc.new_name, color: :light_blue, width: pad
       Pdfh.ident_print "Store Path", doc.store_path, color: :light_blue, width: pad
       Pdfh.ident_print "Other files", doc.companion_files(join: true), color: :light_blue, width: pad

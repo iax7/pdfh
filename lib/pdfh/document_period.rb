@@ -24,9 +24,14 @@ module Pdfh
       @year = (year.size == 2 ? "20#{year}" : year).to_i + year_offset
     end
 
-    # @return [String]
+    # @return [String (frozen)]
     def to_s
       "#{year}-#{month.to_s.rjust(2, "0")}"
+    end
+
+    # @return [String (frozen)]
+    def inspect
+      "<#{self.class} year=#{year} month=#{month}>"
     end
   end
 end

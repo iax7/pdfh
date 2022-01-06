@@ -21,13 +21,13 @@ module Pdfh
 
   # Regular Date Error, when there is not match
   class ReDateError < StandardError
-    def initialize(msg = "No data matched your date regular expression")
+    def initialize(msg = "Date regular expression did not find a match in document.")
       super
     end
   end
 
   class << self
-    attr_writer :verbose, :dry
+    attr_writer :verbose, :dry, :mode
 
     # @return [Boolean]
     def verbose?
@@ -37,6 +37,11 @@ module Pdfh
     # @return [Boolean]
     def dry?
       @dry
+    end
+
+    # @return [Boolean]
+    def file_mode?
+      @mode == :file
     end
 
     # Returns rows, cols
@@ -108,9 +113,7 @@ module Pdfh
       full_path = File.join(File.expand_path("~"), "#{config_file_name}.yml")
       return if File.exist?(full_path) # double check
 
-      File.open(full_path, "w") do |f|
-        f.write Pdfh::SETTINGS_TEMPLATE.to_yaml
-      end
+      File.write(full_path, Pdfh::SETTINGS_TEMPLATE.to_yaml)
       puts "Settings #{full_path.inspect.colorize(:green)} was created."
     end
 
@@ -128,7 +131,7 @@ module Pdfh
       end
 
       raise SettingsIOError, "no configuration file (#{names_to_look.join(" or ")}) was found\n"\
-                               "       within paths: #{dir_order.join(", ")}"
+                             "       within paths: #{dir_order.join(", ")}"
     end
   end
 end

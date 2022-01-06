@@ -3,7 +3,7 @@
 module Pdfh
   # Handles the PDF detected by the rules
   class Document
-    attr_reader :text, :type, :file, :extra, :pdf_doc
+    attr_reader :text, :type, :file, :extra, :pdf_doc, :period
 
     # @param file [String]
     # @param type [DocumentType]
@@ -13,7 +13,7 @@ module Pdfh
 
       @file = file
       @type = type
-      Pdfh.verbose_print "=== Type: #{type.name} =============================="
+      Pdfh.verbose_print "=== Document Type: #{type.name} =============================="
       @pdf_doc = PdfHandler.new(file, type.pwd)
       @text = @pdf_doc.extract_text
       Pdfh.verbose_print "~~~~~~~~~~~~~~~~~~ Finding a subtype"
@@ -52,16 +52,13 @@ module Pdfh
     end
 
     # @return [String]
-    def period
-      @period.to_s
-    end
-
-    # @return [String]
     def new_name
       template = @type.name_template
       new_name = template
                  .sub("{original}", file_name_only)
-                 .sub("{period}", period)
+                 .sub("{period}", period.to_s)
+                 .sub("{year}", period.year.to_s)
+                 .sub("{month}", period.month.to_s)
                  .sub("{type}", type_name)
                  .sub("{subtype}", sub_type)
                  .sub("{extra}", extra || "")
@@ -70,7 +67,7 @@ module Pdfh
 
     # @return [String]
     def store_path
-      @type.store_path.gsub("{YEAR}", @period.year.to_s)
+      @type.store_path.gsub("{YEAR}", period.year.to_s)
     end
 
     # @return [String]
@@ -103,7 +100,7 @@ module Pdfh
     # unnamed matches needs to be in order month, year
     # @return [Array] - format [month, year, day]
     def match_data
-      Pdfh.verbose_print "~~~~~~~~~~~~~~~~~~ RegEx"
+      Pdfh.verbose_print "~~~~~~~~~~~~~~~~~~ Match Data RegEx"
       Pdfh.verbose_print "  Using regex: #{@type.re_date}"
       Pdfh.verbose_print "        named:   #{@type.re_date.named_captures}"
       matched = @type.re_date.match(@text)

@@ -33,19 +33,19 @@ RSpec.describe Pdfh::DocumentPeriod do
       described_class.new(month: param, year: 2021, month_offset: 0).month
     end
 
-    it "month '1'      => 1" do
+    it "month '1' => 1" do
       expect(month("1")).to eq(1)
     end
 
-    it "month 'ene'    => 1" do
+    it "month 'ene' => 1" do
       expect(month("ene")).to eq(1)
     end
 
-    it "month 'enero'  => 1" do
+    it "month 'enero' => 1" do
       expect(month("enero")).to eq(1)
     end
 
-    it "month 'jan'    => 1" do
+    it "month 'jan' => 1" do
       expect(month("jan")).to eq(1)
     end
 
