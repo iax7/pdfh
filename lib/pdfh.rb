@@ -130,8 +130,8 @@ module Pdfh
         end
       end
 
-      raise SettingsIOError, "no configuration file (#{names_to_look.join(" or ")}) was found\n"\
-                             "       within paths: #{dir_order.join(", ")}"
+      raise SettingsIOError, "no configuration file (#{names_to_look.join(" or ")}) was found\n       " \
+                             "within paths: #{dir_order.join(", ")}"
     end
   end
 end

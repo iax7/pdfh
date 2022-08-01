@@ -1,9 +1,82 @@
 # Legacy
 
-## Python
+This project was born as a bash script. It was initially ported to a Python script while I was learning Python. As my Ruby was more polished it ended as a Ruby gem. Below is the old Bash and Python code, provided just for fun.
 
-This project was born as a bash script. It was initially ported to a Python script,
-and ended as a Ruby gem. Below is the old Python code, provided just for fun.
+## Bash Code (v1)
+
+```bash
+#!/bin/env bash
+. .common # this script is hosted in my dotfiles repo
+
+YEAR=$(date +%Y)
+PASS=SECR3T_PASSWORD
+GREP_PERIOD='al [0-9]{1,2} de ([A-Zz-z]*) de.? [0-9]+'
+#Path to move, Dropbox. Use "{YEAR}" to replace with actual year
+MVTO=../"Impuestos/FISCAL-{YEAR}/Edo Cuenta"
+
+app_installed qpdf
+
+count=$(find . -type f -name '[!2]*.pdf' | wc -l)
+if [ "$count" == '0' ]; then
+    echo -e "${RED}Error, no pdf files found.${RST}"
+    exit 1
+fi
+
+for pdf in [!2]*.pdf; do
+    [ ! -r "$pdf" ] && echo -e "${RED}Error, can't access $pdf${RST}" && exit 1
+    echo -e "Working on ${GRE}$pdf${RST}..."
+
+    # Decrypt PDF and uncompress to work with it
+    temp=$(mktemp)
+    #trap 'rm $temp' 0 SIGINT SIGQUIT SIGTERM
+    qpdf --password="$PASS" --decrypt --stream-data=uncompress "$pdf" "$temp"
+
+    # Extract Data from PDF
+    account=$(strings "$temp" | grep -ioE 'platinum|perfiles' | head -1)
+    account=${account,,}
+    account=${account^}
+    echo -e "        account: ${BLU}$account${RST}"
+    #period=$(strings "$temp" | grep -iEo 'al [0-9]{1,2} de ([A-Zz-z]*) de [0-9]+' | tail -1)
+    #month=$(echo "$period" | tr ' ' '\n'| tail -3 | head -1)
+    #year=$(echo "$period" | tr ' ' '\n' | tail -1)
+    period=$(pdftotext "$temp" - | grep -iEo "$GREP_PERIOD" | tail -1 )
+    month=$(echo "$period" | awk '{print $4}')
+    year=$(echo "$period" | awk '{print $6}')
+    period=${month,,}
+
+    if [ -z "$period" ]; then
+      echo -e "${RED}Error, period not found.${RST}"
+      exit 1
+    fi
+
+    number=$(convert_month $period)
+    if [ "$account" == "Perfiles" ]; then
+        #number=$(( number - 1 ))
+        number=$(echo "$number - 1" | bc)
+        if [ "${#number}" -eq 1 ]; then
+          number="0$number"
+        fi
+    fi
+    echo -e "         period: ${BLU}$year-$period${RST}"
+
+    #Prepare new PDF
+    newfile="$year-${number} ${account}.pdf"
+    #pdftk "$pdf" input_pw "$PASS" output "$newfile"
+    qpdf --password="$PASS" --decrypt "$pdf" "$newfile"
+    if [ -f "$newfile" ]; then
+        mv "$pdf" "${newfile/.pdf/}_$pdf"
+        echo -e "       new file: ${BLU}$newfile${RST}"
+    fi
+
+    #Copy it
+    MVTO="${MVTO//'{YEAR}'/$year}"
+    if [ -d "$MVTO" ]; then
+      cp -v "$newfile" "$MVTO"
+    fi
+done
+```
+
+## Python Code (v2)
 
 ```python
 #!/usr/bin/env python3
@@ -376,78 +449,4 @@ def main():
 
 if __name__ == '__main__': main()
 
-```
-
-## Bash
-
-```bash
-#!/bin/env bash
-. .common
-
-YEAR=$(date +%Y)
-PASS=abcdef
-GREP_PERIOD='al [0-9]{1,2} de ([A-Zz-z]*) de.? [0-9]+'
-#Path to move, Dropbox. Use "{YEAR}" to replace with actual year
-MVTO=../"Impuestos/FISCAL-{YEAR}/Edo Cuenta"
-
-app_installed qpdf
-
-count=$(find . -type f -name '[!2]*.pdf' | wc -l)
-if [ "$count" == '0' ]; then
-    echo -e "${RED}Error, no pdf files found.${RST}"
-    exit 1
-fi
-
-for pdf in [!2]*.pdf; do
-    [ ! -r "$pdf" ] && echo -e "${RED}Error, can't access $pdf${RST}" && exit 1
-    echo -e "Working on ${GRE}$pdf${RST}..."
-
-    # Decrypt PDF and uncompress to work with it
-    temp=$(mktemp)
-    #trap 'rm $temp' 0 SIGINT SIGQUIT SIGTERM
-    qpdf --password="$PASS" --decrypt --stream-data=uncompress "$pdf" "$temp"
-
-    # Extract Data from PDF
-    account=$(strings "$temp" | grep -ioE 'platinum|perfiles' | head -1)
-    account=${account,,}
-    account=${account^}
-    echo -e "        account: ${BLU}$account${RST}"
-    #period=$(strings "$temp" | grep -iEo 'al [0-9]{1,2} de ([A-Zz-z]*) de [0-9]+' | tail -1)
-    #month=$(echo "$period" | tr ' ' '\n'| tail -3 | head -1)
-    #year=$(echo "$period" | tr ' ' '\n' | tail -1)
-    period=$(pdftotext "$temp" - | grep -iEo "$GREP_PERIOD" | tail -1 )
-    month=$(echo "$period" | awk '{print $4}')
-    year=$(echo "$period" | awk '{print $6}')
-    period=${month,,}
-
-    if [ -z "$period" ]; then
-      echo -e "${RED}Error, period not found.${RST}"
-      exit 1
-    fi
-
-    number=$(convert_month $period)
-    if [ "$account" == "Perfiles" ]; then
-        #number=$(( number - 1 ))
-        number=$(echo "$number - 1" | bc)
-        if [ "${#number}" -eq 1 ]; then
-          number="0$number"
-        fi
-    fi
-    echo -e "         period: ${BLU}$year-$period${RST}"
-
-    #Prepare new PDF
-    newfile="$year-${number} ${account}.pdf"
-    #pdftk "$pdf" input_pw "$PASS" output "$newfile"
-    qpdf --password="$PASS" --decrypt "$pdf" "$newfile"
-    if [ -f "$newfile" ]; then
-        mv "$pdf" "${newfile/.pdf/}_$pdf"
-        echo -e "       new file: ${BLU}$newfile${RST}"
-    fi
-
-    #Copy it
-    MVTO="${MVTO//'{YEAR}'/$year}"
-    if [ -d "$MVTO" ]; then
-      cp -v "$newfile" "$MVTO"
-    fi
-done
 ```

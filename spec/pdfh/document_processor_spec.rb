@@ -39,7 +39,7 @@ RSpec.describe Pdfh::DocumentProcessor do
 
       allow(main).to receive(:print_ident).and_return(nil)
 
-      expect(main.start).not_to eq(nil)
+      expect(main.start).not_to be_nil
     end
   end
 end

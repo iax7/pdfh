@@ -16,7 +16,7 @@ AllCops:
 
 Layout/LineLength:
   Max: 120
-  IgnoredPatterns: ['^\s*#']
+  AllowedPatterns: ['^\s*#']
 
 Style/StringLiterals:
   Enabled: true

@@ -4,11 +4,11 @@ RSpec.describe Pdfh do
   before { allow($stdout).to receive(:puts).and_return(nil) }
 
   it "has a version number" do
-    expect(described_class::VERSION).not_to be nil
+    expect(described_class::VERSION).not_to be_nil
   end
 
   it "#headline" do
-    expect(described_class.headline("testing")).to eq(nil)
+    expect(described_class.headline("testing")).to be_nil
   end
 
   it "#error_print" do
@@ -17,7 +17,7 @@ RSpec.describe Pdfh do
   end
 
   it "#ident_print" do
-    expect(described_class.ident_print("field name", "value", color: :blue)).to eq(nil)
+    expect(described_class.ident_print("field name", "value", color: :blue)).to be_nil
   end
 
   describe "#search_config_file" do

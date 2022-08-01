@@ -16,7 +16,7 @@ RSpec.describe Pdfh::PdfHandler do
     it "runs Dry" do
       allow(Pdfh).to receive(:dry?).and_return(true).at_least(:once)
 
-      expect(main.write_new_pdf(dir_path, full_path)).to eq(nil)
+      expect(main.write_new_pdf(dir_path, full_path)).to be_nil
     end
 
     it "writes pdf successfully" do

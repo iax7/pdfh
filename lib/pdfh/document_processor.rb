@@ -126,7 +126,7 @@ module Pdfh
       full_path = File.join(base_path, document.store_path, document.new_name)
       dir_path = File.join(base_path, document.store_path)
 
-      FileUtils.mkdir_p(dir_path) unless File.exist?(dir_path)
+      FileUtils.mkdir_p(dir_path)
 
       document.pdf_doc.write_new_pdf(dir_path, full_path)
       make_document_backup(document)
