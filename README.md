@@ -1,9 +1,11 @@
 # PDF Handler (pdfh)
 
-[![Rubocop](https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml/badge.svg)](https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml)
-[![Ruby][ruby-badge]][ruby-url]
+[![Rubocop][rubocop-img]][rubocop-url]
+[![Ruby][ruby-img]][ruby-url]
+[![Conventional Commits][cc-img]][cc-url]
+[![Current version][gem-img]][gem-url]
 
-Examine all PDF files in Look up directories, remove password (if has one), rename and copy to a new directory using regular expresions.
+Examine all PDF files in Look up directories, remove password (if has one), rename and copy to a new directory using regular expressions.
 
 ## Installation
 
@@ -81,5 +83,11 @@ The gem is available as open source under the terms of the [MIT License](https:/
 Everyone interacting in the Pdfh project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/iax7/pdfh/blob/master/CODE_OF_CONDUCT.md).
 
 <!-- Links -->
-[ruby-badge]: https://img.shields.io/badge/ruby-3.1-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
+[rubocop-img]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml/badge.svg
+[rubocop-url]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml
+[ruby-img]: https://img.shields.io/badge/ruby-3.1-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
 [ruby-url]: https://www.ruby-lang.org/en/
+[cc-img]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=00&labelColor=fff
+[cc-url]: https://conventionalcommits.org
+[gem-img]: https://img.shields.io/gem/v/pdfh?labelColor=fff&label=version
+[gem-url]: https://rubygems.org/gems/pdfh

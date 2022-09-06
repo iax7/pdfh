@@ -1,7 +1,7 @@
 ## v3.0.0
   * Migrate to `asdf` from `rvm`
   * Upgrade old gems
-  * Bump to v3 (as this is project's the third iteration)
+  * Bump to v3 (as this is project's third iteration)
 
 ## v0.2.0
   * Major gem refactoring
