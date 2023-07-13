@@ -64,4 +64,10 @@ RSpec.describe Pdfh::DocumentPeriod do
     it { expect(year("21")).to eq(2021) }
     it { expect(year("19")).to eq(2019) }
   end
+
+  describe "#inspect" do
+    subject { described_class.new(month: 7, year: 2023, month_offset: 0).inspect }
+
+    it { is_expected.to eq("<Pdfh::DocumentPeriod year=2023 month=7>") }
+  end
 end

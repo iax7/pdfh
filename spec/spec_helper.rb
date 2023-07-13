@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
-require "support/simplecov_setup"
 require "bundler/setup"
-require "pdfh"
 require "pry"
+# Load support files
+Dir[File.expand_path(File.join("spec", "support", "**", "*.rb"))].sort.each { |f| require f }
+
+require "pdfh"
+require_relative "shared_config"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "base64"
-
 module Pdfh
   DocumentSubType = Struct.new(:name, :month_offset, keyword_init: true)
 
@@ -13,10 +11,13 @@ module Pdfh
       self.name_template ||= "{original}"
       self.re_file = Regexp.new(re_file)
       self.re_date = Regexp.new(re_date)
-      self.pwd = Base64.decode64(pwd) if pwd
       self.sub_types = extract_subtype(sub_types) if sub_types
     end
 
+    # removes special characters from string and replaces spaces with dashes
+    # @example usage
+    #   "Test This?%&".gid
+    #   # => "test-this"
     # @return [String]
     def gid
       name.downcase.gsub(/[^0-9A-Za-z\s]/, "").tr(" ", "-")
@@ -28,7 +29,19 @@ module Pdfh
       sub_types&.find { |st| /#{st.name}/i.match?(text) }
     end
 
+    # @return [String]
+    def password
+      return Base64.decode64(pwd) if base64?
+
+      pwd
+    end
+
     private
+
+    # @return [boolean]
+    def base64?
+      pwd.is_a?(String) && Base64.strict_encode64(Base64.decode64(pwd)) == pwd
+    end
 
     # @param sub_types [Array]
     # @return [DocumentSubType]

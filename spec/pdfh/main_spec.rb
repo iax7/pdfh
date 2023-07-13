@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Pdfh::DocumentProcessor do
-  subject(:main) { described_class.new }
+RSpec.describe Pdfh::Main do
+  include_context "with silent console"
 
   describe "#start" do
     let(:settings_path) { File.expand_path("spec/fixtures/settings.yml") }
@@ -21,25 +21,18 @@ RSpec.describe Pdfh::DocumentProcessor do
                       new_name: "New_name.pdf",
                       store_path: "store_path/YYYY",
                       companion_files: "N/A",
-                      pdf_doc: true,
+                      text: "",
                       print_cmd: "command -arg1 -arg2")
     end
 
-    before do
-      allow($stdout).to receive(:puts).and_return(nil).at_least(:once)
-    end
-
     it "loads" do
-      allow(Pdfh).to receive(:search_config_file).and_return(settings_path)
       allow(Dir).to receive(:[]).and_return(files)
 
       allow_any_instance_of(Pdfh::Settings).to receive(:match_doc_type).with("EdoCta (1).pdf").and_return(type_cta)
       allow_any_instance_of(Pdfh::Settings).to receive(:match_doc_type).with("dummy.pdf").and_return(nil)
       allow(Pdfh::Document).to receive(:new).with("EdoCta (1).pdf", anything).and_return(document)
 
-      allow(main).to receive(:print_ident).and_return(nil)
-
-      expect(main.start).not_to be_nil
+      expect(described_class.start).not_to be_nil
     end
   end
 end

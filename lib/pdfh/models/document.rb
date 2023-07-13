@@ -3,27 +3,44 @@
 module Pdfh
   # Handles the PDF detected by the rules
   class Document
-    attr_reader :text, :type, :file, :extra, :pdf_doc, :period
+    IDENT = 12
+
+    attr_reader :text, :type, :file, :extra, :period
 
     # @param file [String]
     # @param type [DocumentType]
+    # @param text [String]
     # @return [self]
-    def initialize(file, type)
-      raise IOError, "File #{file} not found" unless File.exist?(file)
-
+    def initialize(file, type, text)
       @file = file
       @type = type
-      Pdfh.verbose_print "=== Document Type: #{type.name} =============================="
-      @pdf_doc = PdfHandler.new(file, type.pwd)
-      @text = @pdf_doc.extract_text
-      Pdfh.verbose_print "~~~~~~~~~~~~~~~~~~ Finding a subtype"
+      Pdfh.debug "=== Document Type: #{type.name} =============================="
+      @text = text
+      Pdfh.debug "~~~~~~~~~~~~~~~~~~ Finding a subtype"
       @sub_type = type.sub_type(@text)
-      Pdfh.verbose_print "  SubType: #{@sub_type}"
+      Pdfh.debug "  SubType: #{@sub_type}"
       @companion = search_companion_files
 
       month, year, @extra = match_data
       @period = DocumentPeriod.new(day: extra, month: month, month_offset: @sub_type&.month_offset, year: year)
-      Pdfh.verbose_print "  Period: #{@period.inspect}"
+      Pdfh.debug "  Period: #{@period.inspect}"
+    end
+
+    # @return [void]
+    def print_info
+      print_info_line "Type", type.name
+      print_info_line "Sub-Type", sub_type
+      print_info_line "Period", period
+      print_info_line "New Name", new_name
+      print_info_line "Store Path", store_path
+      print_info_line "Extra files", companion_files(join: true)
+      print_info_line "Print CMD", print_cmd
+      print_info_line "Processed?", "No (in Dry mode)" if Pdfh.dry?
+    end
+
+    # @return [void]
+    def print_info_line(property, info)
+      Pdfh.ident_print property, info.to_s, color: :light_blue, width: IDENT
     end
 
     # @return [String]
@@ -100,13 +117,13 @@ module Pdfh
     # unnamed matches needs to be in order month, year
     # @return [Array] - format [month, year, day]
     def match_data
-      Pdfh.verbose_print "~~~~~~~~~~~~~~~~~~ Match Data RegEx"
-      Pdfh.verbose_print "  Using regex: #{@type.re_date}"
-      Pdfh.verbose_print "        named:   #{@type.re_date.named_captures}"
+      Pdfh.debug "~~~~~~~~~~~~~~~~~~ Match Data RegEx"
+      Pdfh.debug "  Using regex: #{@type.re_date}"
+      Pdfh.debug "        named:   #{@type.re_date.named_captures}"
       matched = @type.re_date.match(@text)
       raise ReDateError unless matched
 
-      Pdfh.verbose_print "     captured: #{matched.captures}"
+      Pdfh.debug "     captured: #{matched.captures}"
 
       return matched.captures.map(&:downcase) if @type.re_date.named_captures.empty?
 
@@ -116,12 +133,12 @@ module Pdfh
 
     # @return [Array]
     def search_companion_files
-      Pdfh.verbose_print "~~~~~~~~~~~~~~~~~~ Searching Companion files"
-      Pdfh.verbose_print "  Searching on: #{home_dir.inspect}"
+      Pdfh.debug "~~~~~~~~~~~~~~~~~~ Searching Companion files"
+      Pdfh.debug "  Searching on: #{home_dir.inspect}"
       Dir.chdir(home_dir) do
         files_matching = Dir["#{file_name_only}.*"]
         companion = files_matching.reject { |file| file.include? ".pdf" }
-        Pdfh.verbose_print "    Found: #{companion.inspect}"
+        Pdfh.debug "    Found: #{companion.inspect}"
 
         companion
       end

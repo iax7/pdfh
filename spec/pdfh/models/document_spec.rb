@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Pdfh::Document do
-  subject(:main) { described_class.new(doc_file, doc_type) }
+  subject(:main) { described_class.new(doc_file, doc_type, text) }
+
+  include_context "with silent console"
 
   let(:doc_file) { File.expand_path("spec/fixtures/cuenta.pdf") }
   let(:doc_type) do
@@ -16,14 +18,20 @@ RSpec.describe Pdfh::Document do
     }
     Pdfh::DocumentType.new(hash)
   end
+  let(:text) do
+    "del 06/Enero/2019 al 05/Febrero/2019
+Cuenta Tipo: Enlace"
+  end
 
   describe "#initialize" do
     it "correctly" do
       expect(main.sub_type).to eq("Enlace")
     end
+  end
 
-    it "fails when does not exists" do
-      expect { described_class.new("/does_not_exists.pdf", doc_type) }.to raise_error(IOError)
+  describe "#print_info" do
+    it "correctly" do
+      expect(main.print_info).to be_nil
     end
   end
 
@@ -88,10 +96,6 @@ RSpec.describe Pdfh::Document do
     let(:text) { "al 27 de Septiembre de 2018 " }
     let(:unnamed_re) { /al \d{2} de (\w+) de (\d{4})/ }
     let(:named_re) { /al (?<d>\d{2}) de (?<m>\w+) de (?<y>\d{4})/ }
-
-    before do
-      main.instance_variable_set(:@text, text)
-    end
 
     it "Regular expresion has unnamed params" do
       type = instance_double(Pdfh::DocumentType, re_date: unnamed_re)
