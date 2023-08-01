@@ -47,8 +47,8 @@ module Pdfh
     # @return [DocumentSubType]
     def extract_subtype(sub_types)
       sub_types.map do |st|
-        name = st["name"]
-        offset = st["month_offset"].to_i
+        name = st[:name]
+        offset = st[:month_offset].to_i
         DocumentSubType.new(name: name, month_offset: offset)
       end
     end
