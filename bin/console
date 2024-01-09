@@ -10,7 +10,7 @@ require "pdfh"
 # (If you use this, don't forget to add pry to your Gemfile!)
 require "pry"
 
-p Pdfh.parse_argv
+p Pdfh::OptParser.parse_argv
 
 Pry.start
 

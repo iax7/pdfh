@@ -1,26 +1,31 @@
 # frozen_string_literal: true
 
-require "yaml"
-
 module Pdfh
   # Handles the config yaml data mapping, and associates a file name with a doc type
   class Settings
-    attr_reader :lookup_dirs, :base_path, :document_types
+    attr_reader :lookup_dirs, :base_path
 
-    # @param config_file [String]
+    # @param config_data [Hash]
     # @return [self]
-    def initialize(config_file)
-      file_hash = YAML.load_file(config_file)
-      Pdfh.verbose_print "Loaded configuration file: #{config_file}"
+    def initialize(config_data)
+      process_lookup_dirs(config_data[:lookup_dirs])
+      process_destination_base(config_data[:destination_base_path])
 
-      process_lookup_dirs(file_hash["lookup_dirs"])
-      process_destination_base(file_hash["destination_base_path"])
+      Pdfh.debug "Configured Look up directories:"
+      lookup_dirs.each.with_index(1) { |dir, idx| Pdfh.debug "  #{idx}. #{dir}" }
+      Pdfh.debug
 
-      Pdfh.verbose_print "Configured Look up directories:"
-      lookup_dirs.each_with_index { |dir, idx| Pdfh.verbose_print "  #{idx + 1}. #{dir}" }
-      Pdfh.verbose_print
+      load_doc_types(config_data[:document_types])
+    end
 
-      @document_types = load_doc_types(file_hash["document_types"])
+    # @return [Array<DocumentType>]
+    def document_types
+      @document_types.values
+    end
+
+    # @return [DocumentType]
+    def document_type(id)
+      @document_types[id]
     end
 
     private
@@ -30,7 +35,7 @@ module Pdfh
       @lookup_dirs = lookup_dirs_list.filter_map do |dir|
         expanded = File.expand_path(dir)
         unless File.directory?(expanded)
-          Pdfh.verbose_print "  ** Error, Directory #{dir} does not exists."
+          Pdfh.debug "  ** Error, Directory #{dir} does not exists."
           next
         end
         expanded
@@ -47,7 +52,10 @@ module Pdfh
 
     # @return [Array<DocumentType>]
     def load_doc_types(doc_types)
-      doc_types.map { |data| DocumentType.new(data) }
+      @document_types = doc_types.each_with_object({}) do |data, result|
+        doc_type = DocumentType.new(data)
+        result.store(doc_type.gid, doc_type)
+      end
     end
   end
 end

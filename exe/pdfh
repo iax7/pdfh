@@ -20,7 +20,7 @@ end
 exit(1) unless validate_installed("qpdf", "pdftotext")
 
 begin
-  Pdfh::DocumentProcessor.new.start
+  Pdfh::Main.start
 rescue StandardError => e
   Pdfh.error_print e.message
 end
