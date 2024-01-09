@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
                        "rename and copy to a new directory using regular expressions."
   spec.homepage      = "https://github.com/iax7/pdfh"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.5.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 

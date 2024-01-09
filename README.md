@@ -15,11 +15,17 @@ gem install pdfh
 
 ### Dependencies
 
-You need to install pdf handling dependencies in order to use this gem. (I have only tested it on macOS)
+You need to install pdf handling dependencies in order to use this gem.
 
+#### macOS
 ```bash
-brew install qpdf
-brew install xpdf
+brew install qpdf # for qpdf
+brew install xpdf # for pdftotext
+```
+
+#### Fedora
+```bash
+sudo dnf install -y qpdf poppler-utils
 ```
 
 ## Usage
