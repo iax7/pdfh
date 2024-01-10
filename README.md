@@ -97,7 +97,7 @@ Everyone interacting in the Pdfh project’s codebases, issue trackers, chat roo
 <!-- Links -->
 [rubocop-img]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml/badge.svg
 [rubocop-url]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml
-[ruby-img]: https://img.shields.io/badge/ruby-3.1-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
+[ruby-img]: https://img.shields.io/badge/ruby-3.3-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
 [ruby-url]: https://www.ruby-lang.org/en/
 [cc-img]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=00&labelColor=fff
 [cc-url]: https://conventionalcommits.org
