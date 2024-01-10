@@ -11,7 +11,7 @@ module Pdfh
       @verbose = arg_options[:verbose]
       @dry = arg_options[:dry]
       @type = arg_options[:type]
-      @files = arg_options[:files]
+      @files = arg_options[:files] || []
       @mode = type ? :file : :directory
     end
 

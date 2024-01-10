@@ -4,8 +4,10 @@ FactoryBot.define do
   factory :options, class: :"Pdfh::Options" do
     verbose { false }
     dry     { false }
-    type    { nil }
-    files   { [] }
-    mode    { :directory }
+
+    trait :file_mode do
+      type  { "example-name" }
+      files { [File.expand_path("spec/fixtures/cuenta.pdf")] }
+    end
   end
 end

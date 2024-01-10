@@ -17,6 +17,11 @@ RSpec.describe Pdfh::SettingsBuilder do
     end
 
     context "when settings file is not found" do
+      before do
+        allow(File).to receive_messages(exist?: false, write: nil) # prevents writing default_yml
+        allow(YAML).to receive(:load_file).and_return(attributes_for(:settings))
+      end
+
       it { is_expected.to be_a(Pdfh::Settings) }
     end
   end

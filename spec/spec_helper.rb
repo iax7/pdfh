@@ -3,7 +3,7 @@
 require "bundler/setup"
 require "pry"
 # Load support files
-Dir[File.expand_path(File.join("spec", "support", "**", "*.rb"))].sort.each { |f| require f }
+Dir[File.expand_path(File.join("spec", "support", "**", "*.rb"))].each { |f| require f }
 
 require "pdfh"
 require_relative "shared_config"

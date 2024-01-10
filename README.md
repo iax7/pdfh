@@ -76,6 +76,12 @@ build pdfh.gemspec
 gem install pdfh-*
 ```
 
+### Conventional Commits
+```bash
+npm install -g @commitlint/cli @commitlint/config-conventional
+commitlint --from origin --to @
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/iax7/pdfh. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.

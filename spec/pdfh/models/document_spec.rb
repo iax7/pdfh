@@ -6,22 +6,8 @@ RSpec.describe Pdfh::Document do
   include_context "with silent console"
 
   let(:doc_file) { File.expand_path("spec/fixtures/cuenta.pdf") }
-  let(:doc_type) do
-    hash = {
-      name: "Cuenta",
-      re_file: /cuenta\.pdf/,
-      re_date: %r{\d{2}/(?<m>\w+)/(?<y>\d{4})},
-      pwd: nil,
-      store_path: "{YEAR}/Edo Cuenta",
-      name_template: "{period} {type} {subtype}",
-      sub_types: [{ "name" => "Enlace" }]
-    }
-    Pdfh::DocumentType.new(hash)
-  end
-  let(:text) do
-    "del 06/Enero/2019 al 05/Febrero/2019
-Cuenta Tipo: Enlace"
-  end
+  let(:doc_type) { build(:document_type) }
+  let(:text) { "del 06/Enero/2019 al 05/Febrero/2019\nCuenta Tipo: Enlace" }
 
   describe "#initialize" do
     it "correctly" do
@@ -94,27 +80,33 @@ Cuenta Tipo: Enlace"
 
   describe "#match_data (private method)" do
     let(:text) { "al 27 de Septiembre de 2018 " }
-    let(:unnamed_re) { /al \d{2} de (\w+) de (\d{4})/ }
-    let(:named_re) { /al (?<d>\d{2}) de (?<m>\w+) de (?<y>\d{4})/ }
 
-    it "Regular expresion has unnamed params" do
-      type = instance_double(Pdfh::DocumentType, re_date: unnamed_re)
-      main.instance_variable_set(:@type, type)
+    context "when regular expression has unnamed params" do
+      let(:unnamed_re) { /al \d{2} de (\w+) de (\d{4})/ }
+      let(:doc_type) { build(:document_type, re_date: unnamed_re) }
 
-      expect(unnamed_re.named_captures).to be_empty
+      it "does not have named captures" do
+        expect(unnamed_re.named_captures).to be_empty
+      end
 
-      result = main.instance_eval { match_data }
-      expect(result).to eq(%w[septiembre 2018])
+      it "returns the correct data" do
+        result = main.instance_eval { match_data }
+        expect(result).to eq(%w[septiembre 2018])
+      end
     end
 
-    it "Regular expresion has named params" do
-      type = instance_double(Pdfh::DocumentType, re_date: named_re)
-      main.instance_variable_set(:@type, type)
+    context "when Regular expression has named params" do
+      let(:named_re) { /al (?<d>\d{2}) de (?<m>\w+) de (?<y>\d{4})/ }
+      let(:doc_type) { build(:document_type, re_date: named_re) }
 
-      expect(named_re.named_captures).not_to be_empty
+      it "does have named captures" do
+        expect(named_re.named_captures).not_to be_empty
+      end
 
-      result = main.instance_eval { match_data }
-      expect(result).to eq(%w[septiembre 2018 27])
+      it "returns the correct data" do
+        result = main.instance_eval { match_data }
+        expect(result).to eq(%w[septiembre 2018 27])
+      end
     end
   end
 end
