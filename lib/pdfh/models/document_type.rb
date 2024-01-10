@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module Pdfh
-  DocumentSubType = Struct.new(:name, :month_offset, keyword_init: true)
-
+  # Represents a type of document that can be processed by pdfh
   DocumentType = Struct.new(:name, :re_file, :re_date, :pwd, :store_path, :name_template, :sub_types, :print_cmd,
                             keyword_init: true) do
     # @return [self]

@@ -12,6 +12,7 @@ require_relative "ext/string"
 # Models
 require_relative "pdfh/models/document"
 require_relative "pdfh/models/document_period"
+require_relative "pdfh/models/document_sub_type"
 require_relative "pdfh/models/document_type"
 require_relative "pdfh/models/settings"
 
