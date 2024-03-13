@@ -22,6 +22,7 @@ require_relative "pdfh/utils/month"
 require_relative "pdfh/utils/opt_parser"
 require_relative "pdfh/utils/options"
 require_relative "pdfh/utils/pdf_file_handler"
+require_relative "pdfh/utils/rename_validator"
 require_relative "pdfh/utils/settings_builder"
 
 require_relative "pdfh/main"

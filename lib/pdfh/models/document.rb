@@ -5,7 +5,7 @@ module Pdfh
   class Document
     IDENT = 12
 
-    attr_reader :text, :type, :file, :extra, :period
+    attr_reader :text, :type, :file, :extra, :period, :rename_validator
 
     # @param file [String]
     # @param type [DocumentType]
@@ -24,6 +24,8 @@ module Pdfh
       month, year, @extra = match_data
       @period = DocumentPeriod.new(day: extra, month: month, month_offset: @sub_type&.month_offset, year: year)
       Pdfh.debug "  Period: #{@period.inspect}"
+      @rename_validator = RenameValidator.new(type.name_template)
+      raise "Invalid name template, unknown: #{rename_validator.unknown.join(", ")}" unless rename_validator.valid?
     end
 
     # @return [void]
@@ -68,18 +70,22 @@ module Pdfh
       @sub_type&.name&.titleize || "N/A"
     end
 
+    # @return [Hash{Symbol->String}]
+    def rename_data
+      {
+        original: file_name_only,
+        period: period.to_s,
+        year: period.year.to_s,
+        month: period.month.to_s,
+        type: type_name,
+        subtype: sub_type,
+        extra: extra || ""
+      }.freeze
+    end
+
     # @return [String]
     def new_name
-      template = @type.name_template
-      new_name = template
-                 .sub("{original}", file_name_only)
-                 .sub("{period}", period.to_s)
-                 .sub("{year}", period.year.to_s)
-                 .sub("{month}", period.month.to_s)
-                 .sub("{type}", type_name)
-                 .sub("{subtype}", sub_type)
-                 .sub("{extra}", extra || "")
-      "#{new_name}.pdf"
+      rename_validator.name(rename_data)
     end
 
     # @return [String]
