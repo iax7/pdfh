@@ -49,12 +49,12 @@ module Pdfh
       # @return [nil]
       def list_types
         settings = SettingsBuilder.build
-        ident = 4
+        ident = 2
         max_width = settings.document_types.map { |t| t.gid.size }.max
         puts "#{" " * ident}#{"ID".ljust(max_width)}  Type Name"
         puts "#{" " * ident}#{"—" * max_width}  #{"—" * 23}"
         settings.document_types.each do |type|
-          puts "#{" " * ident}#{type.gid.ljust(max_width).yellow}  #{type.name.inspect}"
+          puts "#{" " * ident}#{type.gid.ljust(max_width).yellow}  #{type.name}"
         end
         nil
       end

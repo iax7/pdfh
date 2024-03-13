@@ -5,7 +5,7 @@ module Pdfh
   class Document
     IDENT = 12
 
-    attr_reader :text, :type, :file, :extra, :period, :rename_validator
+    attr_reader :text, :type, :file, :extra, :period
 
     # @param file [String]
     # @param type [DocumentType]
@@ -24,8 +24,6 @@ module Pdfh
       month, year, @extra = match_data
       @period = DocumentPeriod.new(day: extra, month: month, month_offset: @sub_type&.month_offset, year: year)
       Pdfh.debug "  Period: #{@period.inspect}"
-      @rename_validator = RenameValidator.new(type.name_template)
-      raise "Invalid name template, unknown: #{rename_validator.unknown.join(", ")}" unless rename_validator.valid?
     end
 
     # @return [void]
@@ -62,7 +60,7 @@ module Pdfh
 
     # @return [String]
     def type_name
-      @type&.name&.titleize || "N/A"
+      type&.name&.titleize || "N/A"
     end
 
     # @return [String]
@@ -85,7 +83,7 @@ module Pdfh
 
     # @return [String]
     def new_name
-      rename_validator.name(rename_data)
+      type.generate_new_name(rename_data)
     end
 
     # @return [String]
