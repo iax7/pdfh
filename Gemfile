@@ -7,6 +7,7 @@ gemspec
 
 gem "bundler", "~> 2.0"
 gem "code-scanning-rubocop", "~> 0.5"
+gem "debug", "~> 1.8"
 gem "factory_bot", "~> 6.2"
 gem "pry", "~> 0.14"
 gem "rake", "~> 13.0"
