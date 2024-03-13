@@ -12,7 +12,10 @@ module Pdfh
       self.re_date = Regexp.new(re_date)
       self.sub_types = extract_subtype(sub_types) if sub_types
       @rename_validator = RenameValidator.new(name_template)
-      raise "Invalid name template, unknown: #{@rename_validator.unknown.join(", ")}" unless @rename_validator.valid?
+      return if @rename_validator.valid?
+
+      errors = @rename_validator.unknown.join(", ")
+      raise ArgumentError, "Document type #{name.inspect} has invalid :name_template. Tokens not recognized: #{errors}"
     end
 
     # removes special characters from string and replaces spaces with dashes

@@ -55,6 +55,8 @@ module Pdfh
       @document_types = doc_types.each_with_object({}) do |data, result|
         doc_type = DocumentType.new(data)
         result.store(doc_type.gid, doc_type)
+      rescue ArgumentError => e
+        Pdfh.error_print e.message, exit_app: false
       end
     end
   end
