@@ -15,7 +15,7 @@ RSpec.describe Pdfh::OptParser do
 
   describe "#version" do
     it "Prints" do
-      expect { described_class.version }.to output("rspec v3.0.1\n").to_stdout
+      expect { described_class.version }.to output(/rspec v\d\.\d\.\d/).to_stdout
     end
   end
 

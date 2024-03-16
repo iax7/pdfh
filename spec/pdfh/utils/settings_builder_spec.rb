@@ -16,6 +16,18 @@ RSpec.describe Pdfh::SettingsBuilder do
       it { is_expected.to be_a(Pdfh::Settings) }
     end
 
+    context "when document type is not valid" do
+      subject { described_class.build.document_types }
+
+      let(:yaml_file) { File.expand_path("spec/fixtures/settings_bad_type.yml") }
+
+      before do
+        allow(described_class).to receive(:search_config_file).and_return(yaml_file)
+      end
+
+      it { is_expected.to be_empty }
+    end
+
     context "when settings file is not found" do
       before do
         allow(File).to receive_messages(exist?: false, write: nil) # prevents writing default_yml

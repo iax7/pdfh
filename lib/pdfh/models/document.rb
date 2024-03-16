@@ -60,7 +60,7 @@ module Pdfh
 
     # @return [String]
     def type_name
-      @type&.name&.titleize || "N/A"
+      type&.name&.titleize || "N/A"
     end
 
     # @return [String]
@@ -68,18 +68,22 @@ module Pdfh
       @sub_type&.name&.titleize || "N/A"
     end
 
+    # @return [Hash{Symbol->String}]
+    def rename_data
+      {
+        original: file_name_only,
+        period: period.to_s,
+        year: period.year.to_s,
+        month: period.month.to_s,
+        type: type_name,
+        subtype: sub_type,
+        extra: extra || ""
+      }.freeze
+    end
+
     # @return [String]
     def new_name
-      template = @type.name_template
-      new_name = template
-                 .sub("{original}", file_name_only)
-                 .sub("{period}", period.to_s)
-                 .sub("{year}", period.year.to_s)
-                 .sub("{month}", period.month.to_s)
-                 .sub("{type}", type_name)
-                 .sub("{subtype}", sub_type)
-                 .sub("{extra}", extra || "")
-      "#{new_name}.pdf"
+      type.generate_new_name(rename_data)
     end
 
     # @return [String]

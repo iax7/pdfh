@@ -26,3 +26,6 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   Enabled: true
   EnforcedStyle: double_quotes
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
