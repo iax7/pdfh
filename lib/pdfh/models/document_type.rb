@@ -11,11 +11,11 @@ module Pdfh
       self.re_file = Regexp.new(re_file)
       self.re_date = Regexp.new(re_date)
       self.sub_types = extract_subtype(sub_types) if sub_types
-      @rename_validator = RenameValidator.new(name_template)
-      return if @rename_validator.valid?
+      @path_validator = RenameValidator.new(store_path)
+      @name_validator = RenameValidator.new(name_template)
+      return if @path_validator.valid? && @name_validator.valid?
 
-      errors = @rename_validator.unknown.join(", ")
-      raise ArgumentError, "Document type #{name.inspect} has invalid :name_template. Tokens not recognized: #{errors}"
+      raise_validators_error
     end
 
     # removes special characters from string and replaces spaces with dashes
@@ -43,7 +43,13 @@ module Pdfh
     # @param values [Hash{Symbol->String}
     # @return [String]
     def generate_new_name(values)
-      @rename_validator.name(values)
+      @name_validator.gsub(values)
+    end
+
+    # @param values [Hash{Symbol->String}
+    # @return [String]
+    def generate_path(values)
+      @path_validator.gsub(values)
     end
 
     private
@@ -61,6 +67,15 @@ module Pdfh
         offset = st[:month_offset].to_i
         DocumentSubType.new(name: name, month_offset: offset)
       end
+    end
+
+    # @raise [ArgumentError] when called
+    # @return [void]
+    def raise_validators_error
+      template = "has invalid %<1>s. Unknown tokens: %<2>s"
+      path_errors = @path_validator.valid? ? "" : format(template, :store_path, @path_validator.unknown.join(", "))
+      name_errors = @name_validator.valid? ? "" : format(template, :name_template, @name_validator.unknown.join(", "))
+      raise ArgumentError, "Document type #{name.inspect} #{path_errors} #{name_errors}"
     end
   end
 end

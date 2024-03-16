@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pdfh (3.0.3)
+    pdfh (3.1.0)
       colorize (~> 1.1.0)
 
 GEM
@@ -20,7 +20,7 @@ GEM
     ansi (1.5.0)
     ast (2.4.2)
     base64 (0.2.0)
-    bigdecimal (3.1.6)
+    bigdecimal (3.1.7)
     blockenspiel (0.5.0)
     code-scanning-rubocop (0.6.1)
       rubocop (~> 1.0)
@@ -45,7 +45,7 @@ GEM
     json (2.7.1)
     language_server-protocol (3.17.0.3)
     method_source (1.0.0)
-    minitest (5.22.2)
+    minitest (5.22.3)
     mutex_m (0.2.0)
     parallel (1.24.0)
     parser (3.3.0.5)
@@ -59,10 +59,10 @@ GEM
     racc (1.7.3)
     rainbow (3.1.1)
     rake (13.1.0)
-    rdoc (6.6.2)
+    rdoc (6.6.3.1)
       psych (>= 4.0.0)
     regexp_parser (2.9.0)
-    reline (0.4.3)
+    reline (0.5.0)
       io-console (~> 0.5)
     rexml (3.2.6)
     rspec (3.13.0)
@@ -148,4 +148,4 @@ DEPENDENCIES
   versionomy (~> 0.5)
 
 BUNDLED WITH
-   2.5.6
+   2.5.7

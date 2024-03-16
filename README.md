@@ -18,20 +18,22 @@ gem install pdfh
 You need to install pdf handling dependencies in order to use this gem.
 
 #### macOS
+
 ```bash
 brew install qpdf # for qpdf
 brew install xpdf # for pdftotext
 ```
 
 #### Fedora
+
 ```bash
 sudo dnf install -y qpdf poppler-utils
 ```
 
 ## Usage
 
-After installing this gem you need to create your configuration file on your home folder.
-`pdfh.yml`
+After installing this gem you need to create your configuration file on your home folder. `pdfh.yml`
+
 ```yaml
 ---
 lookup_dirs:       # Directories where all pdf's are going to be analyzed
@@ -42,25 +44,22 @@ document_types:
     re_file: '.*MyBankReg\.pdf'           # Regular expression to match its filename
     re_date: 'al \d{1,2} de (\w+) del? (\d+)' # Date regular expresion
     pwd: base64string                     # [OPTIONAL] Password if the document is protected
-    store_path: "{YEAR}/bank_docs"        # Relative path to copy this document
+    store_path: "{year}/bank_docs"        # Relative path to copy this document
     name_template: '{period} {subtype}'   # Template for new filename when copied
     sub_types:                            # [OPTIONAL] In case your need an extra category
       - name: Account1                       # Regular expresion to match this subtype
         month_offset: -1                     # [OPTIONAL] Integer (signed) value to adjust month
 ```
 
-Store Path supported placeholders:
-* `{YEAR}` 2022
+**Store Path** and **Name Template** supported placeholders:
 
-Name Template supported placeholders:
-
-* `{original}` Original filename
-* `{period}` 2022-01
-* `{year}` 2022
-* `{month}` 01
-* `{type}` document_type.name
-* `{subtype}` subtype.name if matched
-* `{extra}` day if provided/matched
+- `{original}` Original filename
+- `{period}` 2022-01
+- `{year}` 2022
+- `{month}` 01
+- `{type}` document_type.name
+- `{subtype}` subtype.name if matched
+- `{extra}` day if provided/matched
 
 ## Development
 
@@ -77,6 +76,7 @@ gem install pdfh-*
 ```
 
 ### Conventional Commits
+
 ```bash
 npm install -g @commitlint/cli @commitlint/config-conventional
 commitlint --from origin --to @
