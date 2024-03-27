@@ -3,8 +3,6 @@
 module Pdfh
   # Handles the PDF detected by the rules
   class Document
-    IDENT = 12
-
     attr_reader :text, :type, :file, :extra, :period
 
     # @param file [String]
@@ -40,12 +38,17 @@ module Pdfh
 
     # @return [void]
     def print_info_line(property, info)
-      Pdfh.ident_print property, info.to_s, color: :light_blue, width: IDENT
+      Pdfh.ident_print property, info.to_s, color: :light_blue, width: 12
     end
 
     # @return [String]
     def file_name_only
-      File.basename(@file, File.extname(@file))
+      File.basename(@file, file_extension)
+    end
+
+    # @return [String]
+    def file_extension
+      File.extname(@file)
     end
 
     # @return [String]
@@ -83,12 +86,13 @@ module Pdfh
 
     # @return [String]
     def new_name
-      type.generate_new_name(rename_data)
+      new_name = type.generate_new_name(rename_data)
+      "#{new_name}#{file_extension}"
     end
 
     # @return [String]
     def store_path
-      @type.store_path.gsub("{YEAR}", period.year.to_s)
+      type.generate_path(rename_data)
     end
 
     # @return [String]
@@ -99,6 +103,7 @@ module Pdfh
       "#{type.print_cmd} #{relative_path}"
     end
 
+    # @return [String (frozen)]
     def companion_files(join: false)
       return @companion unless join
 
