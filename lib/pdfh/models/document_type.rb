@@ -73,8 +73,8 @@ module Pdfh
     # @return [void]
     def raise_validators_error
       template = "has invalid %<1>s. Unknown tokens: %<2>s"
-      path_errors = @path_validator.valid? ? "" : format(template, :store_path, @path_validator.unknown.join(", "))
-      name_errors = @name_validator.valid? ? "" : format(template, :name_template, @name_validator.unknown.join(", "))
+      path_errors = format(template, :store_path, @path_validator.unknown_list) unless @path_validator.valid?
+      name_errors = format(template, :name_template, @name_validator.unknown_list) unless @name_validator.valid?
       raise ArgumentError, "Document type #{name.inspect} #{path_errors} #{name_errors}"
     end
   end

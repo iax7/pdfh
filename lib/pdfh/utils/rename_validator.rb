@@ -34,6 +34,11 @@ module Pdfh
       unknown.empty?
     end
 
+    # @return [String]
+    def unknown_list
+      unknown.join(", ")
+    end
+
     # @param values [Hash{Symbol->String}]
     # @return [String (frozen)]
     def gsub(values)
