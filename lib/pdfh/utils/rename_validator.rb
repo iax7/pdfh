@@ -13,13 +13,13 @@ module Pdfh
       "extra"    => "Extra data extracted from date_re"
     }.freeze
 
-    attr_reader :name_template, :all, :unknown, :valid
+    attr_reader :template, :all, :unknown, :valid
 
-    # @param name_template [String]
+    # @param template [String]
     # @return [self]
-    def initialize(name_template)
-      @name_template = name_template
-      @all = name_template.scan(/{(\w+)}/).flatten
+    def initialize(template)
+      @template = template
+      @all = template.scan(/{([^}]+)}/).flatten.map(&:downcase)
       @unknown = all - types
       @valid = all - unknown
     end
@@ -34,11 +34,17 @@ module Pdfh
       unknown.empty?
     end
 
+    # @return [String]
+    def unknown_list
+      unknown.join(", ")
+    end
+
     # @param values [Hash{Symbol->String}]
     # @return [String (frozen)]
-    def name(values)
-      new_name = name_template.gsub("{", "%{") % values
-      "#{new_name}.pdf"
+    def gsub(values)
+      template
+        .gsub(/\{([^}]+)}/, &:downcase) # convert all text between {} to lowercase
+        .gsub("{", "%{") % values
     end
   end
 end
