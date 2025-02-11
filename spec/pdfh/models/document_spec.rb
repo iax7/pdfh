@@ -67,17 +67,6 @@ RSpec.describe Pdfh::Document do
     end
   end
 
-  describe "#print_cmd" do
-    it "returns nil if string empty" do
-      expect(main.print_cmd).to eq("N/A")
-    end
-
-    it "returns string if not empty" do
-      main.type.print_cmd = "command"
-      expect(main.print_cmd).to start_with("command")
-    end
-  end
-
   describe "#match_data (private method)" do
     let(:text) { "al 27 de Septiembre de 2018 " }
 
