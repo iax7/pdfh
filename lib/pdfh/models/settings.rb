@@ -57,6 +57,7 @@ module Pdfh
         result.store(doc_type.gid, doc_type)
       rescue ArgumentError => e
         Pdfh.error_print e.message, exit_app: false
+        Pdfh.backtrace_print e if Pdfh.verbose?
       end
     end
   end

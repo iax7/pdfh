@@ -41,6 +41,14 @@ module Pdfh
       exit 1 if exit_app
     end
 
+    # @param e [StandardError]
+    # @return [void]
+    def backtrace_print(e)
+      e.backtrace&.each do |line|
+        output "  ↳ #{line.sub("#{Dir.pwd}/", "")}".colorize(:light_black)
+      end
+    end
+
     # @param message [String]
     # @return [void]
     def warn_print(message)
