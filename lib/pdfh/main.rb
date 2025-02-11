@@ -22,6 +22,7 @@ module Pdfh
         Pdfh.create_settings_file
         exit(1)
       rescue StandardError => e
+        Pdfh.backtrace_print e if Pdfh.verbose?
         Pdfh.error_print(e.message)
       end
 

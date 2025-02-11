@@ -45,6 +45,6 @@ module Pdfh
   class << self
     extend Forwardable
     def_delegators :@options, :verbose?, :dry?, :file_mode?
-    def_delegators :@console, :ident_print, :warn_print, :error_print, :headline, :debug, :info, :print_options
+    def_delegators :@console, :ident_print, :warn_print, :error_print, :backtrace_print, :headline, :debug, :info, :print_options
   end
 end
