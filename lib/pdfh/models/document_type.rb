@@ -2,7 +2,7 @@
 
 module Pdfh
   # Represents a type of document that can be processed by pdfh
-  DocumentType = Struct.new(:name, :re_file, :re_date, :pwd, :store_path, :name_template, :sub_types, :print_cmd,
+  DocumentType = Struct.new(:name, :re_file, :re_date, :pwd, :store_path, :name_template, :sub_types,
                             keyword_init: true) do
     # @return [self]
     def initialize(args)

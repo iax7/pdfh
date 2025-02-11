@@ -32,7 +32,6 @@ module Pdfh
       print_info_line "New Name", new_name
       print_info_line "Store Path", store_path
       print_info_line "Extra files", companion_files(join: true)
-      print_info_line "Print CMD", print_cmd
       print_info_line "Processed?", "No (in Dry mode)" if Pdfh.dry?
     end
 
@@ -93,14 +92,6 @@ module Pdfh
     # @return [String]
     def store_path
       type.generate_path(rename_data)
-    end
-
-    # @return [String]
-    def print_cmd
-      return "N/A" if type.print_cmd.nil? || type.print_cmd.empty?
-
-      relative_path = File.join(store_path, new_name)
-      "#{type.print_cmd} #{relative_path}"
     end
 
     # @return [String (frozen)]
