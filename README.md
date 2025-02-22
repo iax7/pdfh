@@ -30,9 +30,19 @@ brew install xpdf # for pdftotext
 sudo dnf install -y qpdf poppler-utils
 ```
 
+#### Arch
+
+```bash
+sudo pacman -S qpdf poppler
+```
+
 ## Usage
 
-After installing this gem you need to create your configuration file on your home folder. `pdfh.yml`
+After installing this gem you need to create your configuration file on any of the following directories:
+
+- `~/.config/pdfh.yml`
+- `~/pdfh.yml`
+- or configure `PDFH_CONFIG_FILE` environment variable
 
 ```yaml
 ---
@@ -84,7 +94,7 @@ commitlint --from origin --to @
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/iax7/pdfh. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at <https://github.com/iax7/pdfh>. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -97,7 +107,7 @@ Everyone interacting in the Pdfh project’s codebases, issue trackers, chat roo
 <!-- Links -->
 [rubocop-img]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml/badge.svg
 [rubocop-url]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml
-[ruby-img]: https://img.shields.io/badge/ruby-3.3-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
+[ruby-img]: https://img.shields.io/badge/ruby-3.4-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
 [ruby-url]: https://www.ruby-lang.org/en/
 [cc-img]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=00&labelColor=fff
 [cc-url]: https://conventionalcommits.org

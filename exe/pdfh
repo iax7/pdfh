@@ -9,7 +9,7 @@ require "pdfh"
 def validate_installed(*apps)
   found_app = []
   apps.each_with_object(found_app) do |app, result|
-    _stdout, _stderr, status = Open3.capture3("command -v #{app}")
+    _stdout, _stderr, status = Open3.capture3("which #{app}")
     puts "Missing #{app} command." unless status.success?
     result << status.success?
   end

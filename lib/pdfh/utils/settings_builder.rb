@@ -3,13 +3,17 @@
 module Pdfh
   # Loads or creates a default settings yaml file
   class SettingsBuilder
-    CONFIG_FILE_LOCATIONS = [Dir.pwd, File.expand_path("~")].freeze
+    CONFIG_FILE_LOCATIONS = [Dir.pwd, ENV.fetch("XDG_CONFIG_HOME", "~/.config"), "~"].freeze
     SUPPORTED_EXTENSIONS = %w[yml yaml].freeze
+    ENV_VAR = "PDFH_CONFIG_FILE"
 
     class << self
       # @return [Pdfh::Settings]
       def build
-        config_file = search_config_file
+        env_config_file = ENV.fetch(ENV_VAR, nil)
+        raise "File path in #{ENV_VAR} not found" if env_config_file && !File.exist?(env_config_file)
+
+        config_file = env_config_file || search_config_file
         file_hash = YAML.load_file(config_file, symbolize_names: true)
         Pdfh.debug "Loaded configuration file: #{config_file}"
 
@@ -42,7 +46,8 @@ module Pdfh
       # Gets the first settings file found, or creates a new one
       # @return [String]
       def search_config_file
-        CONFIG_FILE_LOCATIONS.each do |dir|
+        CONFIG_FILE_LOCATIONS.each do |dir_string|
+          dir = File.expand_path(dir_string)
           SUPPORTED_EXTENSIONS.each do |ext|
             path = File.join(dir, "#{config_file_name}.#{ext}")
             return path if File.exist?(path)
