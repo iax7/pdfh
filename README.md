@@ -32,7 +32,10 @@ sudo dnf install -y qpdf poppler-utils
 
 ## Usage
 
-After installing this gem you need to create your configuration file on your home folder. `pdfh.yml`
+After installing this gem you need to create your configuration file on any of the following directories:
+- `~/.config/pdfh.yml`
+- `~/pdfh.yml`
+- or configure `PDFH_CONFIG_FILE` environment variable
 
 ```yaml
 ---

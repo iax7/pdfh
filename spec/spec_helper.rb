@@ -18,4 +18,8 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.before do
+    stub_const("ENV", ENV.to_hash.merge("PDFH_CONFIG_FILE" => nil))
+  end
 end
