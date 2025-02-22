@@ -2,20 +2,27 @@
 
 module Pdfh
   # Represents a type of document that can be processed by pdfh
-  DocumentType = Struct.new(:name, :re_file, :re_date, :pwd, :store_path, :name_template, :sub_types,
-                            keyword_init: true) do
+  class DocumentType
+    attr_reader :name, :re_file, :re_date, :pwd, :store_path, :name_template, :sub_types
+
+    # @param args [Hash]
     # @return [self]
     def initialize(args)
-      super
-      self.name_template ||= "{original}"
-      self.re_file = Regexp.new(re_file)
-      self.re_date = Regexp.new(re_date)
-      self.sub_types = extract_subtypes(sub_types) if sub_types&.any?
+      args.each { |k, v| instance_variable_set(:"@#{k}", v) }
+      @name_template ||= "{original}"
+      @re_file = Regexp.new(re_file)
+      @re_date = Regexp.new(re_date)
+      @sub_types = extract_subtypes(sub_types) if sub_types&.any?
       @path_validator = RenameValidator.new(store_path)
       @name_validator = RenameValidator.new(name_template)
       return if @path_validator.valid? && @name_validator.valid?
 
       raise_validators_error
+    end
+
+    # @return [Hash{Symbol->any}]
+    def to_h
+      instance_variables.to_h { |var| [var.to_s.delete_prefix("@"), instance_variable_get(var)] }
     end
 
     # removes special characters from string and replaces spaces with dashes
