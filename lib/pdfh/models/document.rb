@@ -12,14 +12,18 @@ module Pdfh
     def initialize(file, type, text)
       @file = file
       @type = type
-      Pdfh.debug "=== Document Type: #{type.name} =============================="
       @text = text
+    end
+
+    # @return [void]
+    def process
+      Pdfh.debug "=== Document Type: #{type.name} =============================="
       Pdfh.debug "~~~~~~~~~~~~~~~~~~ Finding a subtype"
       @sub_type = type.sub_type(@text)
       Pdfh.debug "  SubType: #{@sub_type}"
       @companion = search_companion_files
 
-      month, year, @extra = match_data
+      month, year, @extra = match_date(@sub_type&.re_date || @type.re_date)
       @period = DocumentPeriod.new(day: extra, month: month, month_offset: @sub_type&.month_offset, year: year)
       Pdfh.debug "  Period: #{@period.inspect}"
     end
@@ -116,16 +120,17 @@ module Pdfh
     # named matches can appear in any order with names 'd', 'm' and 'y'
     # unnamed matches needs to be in order month, year
     # @return [Array] - format [month, year, day]
-    def match_data
+    # @param regex [RegularExpression]
+    def match_date(regex)
       Pdfh.debug "~~~~~~~~~~~~~~~~~~ Match Data RegEx"
-      Pdfh.debug "  Using regex: #{@type.re_date}"
-      Pdfh.debug "        named:   #{@type.re_date.named_captures}"
-      matched = @type.re_date.match(@text)
+      Pdfh.debug "  Using regex: #{regex}"
+      Pdfh.debug "        named:   #{regex.named_captures}"
+      matched = regex.match(@text)
       raise ReDateError unless matched
 
       Pdfh.debug "     captured: #{matched.captures}"
 
-      return matched.captures.map(&:downcase) if @type.re_date.named_captures.empty?
+      return matched.captures.map(&:downcase) if regex.named_captures.empty?
 
       extra = matched.captures.size > 2 ? matched[:d] : nil
       [matched[:m].downcase, matched[:y], extra]

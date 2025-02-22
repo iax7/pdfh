@@ -25,6 +25,7 @@ module Pdfh
       raise IOError, "File #{file} not found" unless File.exist?(file)
 
       @document = Document.new(file, type, extract_text)
+      document.process
       document.print_info
       write_pdf(base_path)
 

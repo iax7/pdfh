@@ -9,6 +9,6 @@ FactoryBot.define do
     store_path    { "{YEAR}/Edo Cuenta" }
     name_template { "{period} {type} {subtype}" }
 
-    sub_types     { create_list(:document_sub_type, 1) }
+    sub_types     { create_list(:document_sub_type, 1).map(&:to_h) }
   end
 end
