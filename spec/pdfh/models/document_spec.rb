@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Pdfh::Document do
-  subject(:main) { described_class.new(doc_file, doc_type, text) }
+  subject(:main) { described_class.new(doc_file, doc_type, text).tap { it.process } }
 
   include_context "with silent console"
 
@@ -79,7 +79,7 @@ RSpec.describe Pdfh::Document do
       end
 
       it "returns the correct data" do
-        result = main.instance_eval { match_data }
+        result = main.__send__(:match_date, unnamed_re)
         expect(result).to eq(%w[septiembre 2018])
       end
     end
@@ -93,7 +93,7 @@ RSpec.describe Pdfh::Document do
       end
 
       it "returns the correct data" do
-        result = main.instance_eval { match_data }
+        result = main.__send__(:match_date, named_re)
         expect(result).to eq(%w[septiembre 2018 27])
       end
     end
