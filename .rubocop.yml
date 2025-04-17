@@ -1,10 +1,9 @@
 inherit_from: .rubocop_todo.yml
 
-require:
-  - rubocop-factory_bot
+plugins:
   - rubocop-performance
+  - rubocop-factory_bot
   - rubocop-rake
-  - rubocop-rspec
 
 AllCops:
   NewCops: enable
@@ -14,6 +13,8 @@ AllCops:
     - pkg/**/*
     - tmp/**/*
     - vendor/**/*
+  SuggestExtensions:
+    rubocop-rspec: false
 
 Layout/LineLength:
   Max: 120
