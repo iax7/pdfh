@@ -18,6 +18,7 @@ require_relative "pdfh/models/settings"
 
 # Utils
 require_relative "pdfh/utils/console"
+require_relative "pdfh/utils/dependency_validator"
 require_relative "pdfh/utils/month"
 require_relative "pdfh/utils/opt_parser"
 require_relative "pdfh/utils/options"
@@ -31,6 +32,8 @@ require_relative "pdfh/version"
 
 # Gem entry point
 module Pdfh
+  REQUIRED_CMDS = %i[qpdf pdftotext].freeze
+
   # Settings not found
   class SettingsIOError < StandardError; end
 

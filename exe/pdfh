@@ -1,23 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "open3"
 require "pdfh"
 
-# @param apps [Array]
-# @return [Boolean]
-def validate_installed(*apps)
-  found_app = []
-  apps.each_with_object(found_app) do |app, result|
-    _stdout, _stderr, status = Open3.capture3("which #{app}")
-    puts "Missing #{app} command." unless status.success?
-    result << status.success?
-  end
-
-  found_app.all?
-end
-
-exit(1) unless validate_installed("qpdf", "pdftotext")
+exit(1) if Pdfh::Utils::DependencyValidator.missing?(*Pdfh::REQUIRED_CMDS)
 
 begin
   Pdfh::Main.start
