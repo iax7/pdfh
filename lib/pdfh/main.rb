@@ -31,7 +31,7 @@ module Pdfh
       attr_reader :options, :settings
 
       # @param [String] file_name
-      # @return [DocumentType]
+      # @return [DocumentType, nil]
       def match_doc_type(file_name)
         settings.document_types.each do |type|
           match = type.re_file.match(file_name)

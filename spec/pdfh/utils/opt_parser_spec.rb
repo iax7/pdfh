@@ -32,4 +32,22 @@ RSpec.describe Pdfh::OptParser do
       expect { described_class.list_types }.to output(expected).to_stdout
     end
   end
+
+  context "when an invalid option is provided" do
+    before do
+      allow(Pdfh::OptParser::OPT_PARSER).to receive(:parse!).and_raise(
+        OptionParser::InvalidOption.new("invalid option: --invalid-option")
+      )
+      allow(Pdfh).to receive(:error_print)
+      allow(described_class).to receive(:exit).with(1)
+      allow(described_class).to receive(:puts)
+    end
+
+    it "handles invalid options and exits with status 1" do
+      expect(Pdfh).to receive(:error_print).with(/invalid option/, hash_including(:exit_app => false))
+      expect(described_class).to receive(:exit).with(1)
+
+      described_class.parse_argv
+    end
+  end
 end

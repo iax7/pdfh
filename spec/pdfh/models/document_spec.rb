@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Pdfh::Document do
-  subject(:main) { described_class.new(doc_file, doc_type, text).tap { it.process } }
+  subject(:main) { described_class.new(doc_file, doc_type, text).tap(&:process) }
 
   include_context "with silent console"
 
