@@ -3,6 +3,22 @@
 module Pdfh
   # Represents a type of document that can be processed by pdfh
   class DocumentType
+    include Concerns::PasswordDecodable
+
+    # @!attribute [r] name
+    #   @return [String] The name of the document type.
+    # @!attribute [r] re_file
+    #   @return [Regexp] The regular expression to match file names.
+    # @!attribute [r] re_date
+    #   @return [Regexp] The regular expression to extract dates and its information.
+    # @!attribute [r] pwd
+    #   @return [String, nil] The base64 password for the document type, if any.
+    # @!attribute [r] store_path
+    #   @return [String] The path where the document will be stored.
+    # @!attribute [r] name_template
+    #   @return [String] The template for generating document names.
+    # @!attribute [r] sub_types
+    #   @return [Array<DocumentSubType>, nil] The subtypes of the document, if any.
     attr_reader :name, :re_file, :re_date, :pwd, :store_path, :name_template, :sub_types
 
     # @param args [Hash]
@@ -41,13 +57,6 @@ module Pdfh
       sub_types&.find { |st| /#{st.name}/i.match?(text) }
     end
 
-    # @return [String]
-    def password
-      return Base64.decode64(pwd) if base64?
-
-      pwd
-    end
-
     # @param values [Hash{Symbol->String}
     # @return [String]
     def generate_new_name(values)
@@ -63,11 +72,6 @@ module Pdfh
     private
 
     attr_accessor :path_validator, :name_validator
-
-    # @return [boolean]
-    def base64?
-      pwd.is_a?(String) && Base64.strict_encode64(Base64.decode64(pwd)) == pwd
-    end
 
     # @param sub_types [Array<Hash{Symbol->String}>]
     # @return [Array<DocumentSubType>]

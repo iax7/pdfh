@@ -9,6 +9,9 @@ require "yaml"
 
 require_relative "ext/string"
 
+# Concerns
+require_relative "pdfh/concerns/password_decodable"
+
 # Models
 require_relative "pdfh/models/document"
 require_relative "pdfh/models/document_period"
