@@ -4,24 +4,22 @@ RSpec.describe Pdfh::Main do
   include_context "with silent console"
 
   describe "#start" do
+    let(:files) { ["EdoCta (1).pdf", "dummy.pdf"] }
+
     before do
-      allow($stdout).to receive(:puts)
+      # prevent silent console contest from being override
+      allow(described_class).to receive(:assign_global_utils)
     end
 
-    context "when no provided files" do
+    context "when no provided files (NORMAL)" do
       let(:settings_path) { File.expand_path("spec/fixtures/settings.yml") }
-      let(:files) { ["EdoCta (1).pdf", "dummy.pdf"] }
       let(:type_cta) { build(:document_type) }
       let(:document) { build(:document) }
 
       it "loads" do
         allow(Dir).to receive(:[]).and_return(files)
 
-        allow_any_instance_of(Pdfh::Settings).to receive(:match_doc_type).with("EdoCta (1).pdf").and_return(type_cta)
-        allow_any_instance_of(Pdfh::Settings).to receive(:match_doc_type).with("dummy.pdf").and_return(nil)
-        allow(Pdfh::Document).to receive(:new).with("EdoCta (1).pdf", anything).and_return(document)
-
-        expect(described_class.start).not_to be_nil
+        expect(described_class.start(argv: [])).not_to be_nil
       end
     end
 
@@ -31,7 +29,7 @@ RSpec.describe Pdfh::Main do
 
       it "loads" do
         allow(Pdfh::OptParser).to receive(:new).and_return(parser)
-        expect(described_class.start).to eq(options[:files])
+        expect(described_class.start(argv: files)).to eq(options[:files])
       end
     end
 
@@ -53,7 +51,7 @@ RSpec.describe Pdfh::Main do
         expect(Pdfh).to receive(:create_settings_file)
         expect(described_class).to receive(:exit).with(1)
 
-        described_class.start
+        described_class.start(argv: [])
       end
     end
 
@@ -80,9 +78,25 @@ RSpec.describe Pdfh::Main do
           expect(Pdfh).to receive(:backtrace_print).with(error)
           expect(Pdfh).to receive(:error_print).with(error_message)
 
-          described_class.start
+          described_class.start(argv: [])
         end
       end
+    end
+  end
+
+  describe "#assign_global_utils" do
+    let(:options) { instance_double(Pdfh::Options, verbose?: true) }
+    let(:console) { instance_double(Pdfh::Console) }
+
+    before do
+      allow(Pdfh::Console).to receive(:new).and_return(console)
+    end
+
+    it "sets the global options and console" do
+      expect(Pdfh).to receive(:instance_variable_set).with(:@options, options)
+      expect(Pdfh).to receive(:instance_variable_set).with(:@console, console)
+
+      described_class.send(:assign_global_utils, options)
     end
   end
 end

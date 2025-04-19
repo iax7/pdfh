@@ -8,4 +8,4 @@ require "pry"
 
 exit(1) if Pdfh::Utils::DependencyValidator.missing?(*Pdfh::REQUIRED_CMDS)
 
-Pdfh::Main.start
+Pdfh::Main.start(argv: ARGV)

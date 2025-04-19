@@ -4,13 +4,12 @@ module Pdfh
   # Main functionality. This class is intended to manage the pdf documents
   class Main
     class << self
+      # @param argv [Array<String>]
       # @return [void]
-      def start
-        arg_options = Pdfh::OptParser.new(argv: ARGV).parse_argv
+      def start(argv:)
+        arg_options = Pdfh::OptParser.new(argv: argv).parse_argv
         @options = Options.new(arg_options)
-
-        Pdfh.instance_variable_set(:@options, options)
-        Pdfh.instance_variable_set(:@console, Console.new(options.verbose?))
+        assign_global_utils(@options)
         Pdfh.print_options(arg_options)
 
         @settings = SettingsBuilder.build
@@ -29,6 +28,13 @@ module Pdfh
       private
 
       attr_reader :options, :settings
+
+      # @param options [Options]
+      # @return [void]
+      def assign_global_utils(options)
+        Pdfh.instance_variable_set(:@options, options)
+        Pdfh.instance_variable_set(:@console, Console.new(options.verbose?))
+      end
 
       # @param [String] file_name
       # @return [DocumentType, nil]
@@ -78,10 +84,10 @@ module Pdfh
             ignored_files << base_name_no_ext(pdf_file)
           end
         end
-        puts "  (No files processed)".colorize(:light_black) if processed_count.zero?
+        Pdfh.info "  (No files processed)".colorize(:light_black) if processed_count.zero?
         return unless Pdfh.verbose?
 
-        puts "\n  No document type found for these PDF files:" if ignored_files.any?
+        Pdfh.info "\n  No document type found for these PDF files:" if ignored_files.any?
         ignored_files.each.with_index(1) { |file, index| Pdfh.ident_print index, file, color: :magenta }
       end
 
