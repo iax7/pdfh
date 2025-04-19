@@ -6,7 +6,7 @@ module Pdfh
     class << self
       # @return [void]
       def start
-        arg_options = Pdfh::OptParser.parse_argv
+        arg_options = Pdfh::OptParser.new(argv: ARGV).parse_argv
         @options = Options.new(arg_options)
 
         Pdfh.instance_variable_set(:@options, options)

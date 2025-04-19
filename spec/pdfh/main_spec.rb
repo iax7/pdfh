@@ -27,9 +27,10 @@ RSpec.describe Pdfh::Main do
 
     context "when provided files" do
       let(:options) { attributes_for(:options, :file_mode) }
+      let(:parser) { instance_double(Pdfh::OptParser, parse_argv: options) }
 
       it "loads" do
-        allow(Pdfh::OptParser).to receive(:parse_argv).and_return(options)
+        allow(Pdfh::OptParser).to receive(:new).and_return(parser)
         expect(described_class.start).to eq(options[:files])
       end
     end
