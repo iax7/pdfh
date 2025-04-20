@@ -18,6 +18,7 @@ require_relative "pdfh/models/document_period"
 require_relative "pdfh/models/document_sub_type"
 require_relative "pdfh/models/document_type"
 require_relative "pdfh/models/settings"
+require_relative "pdfh/models/zip_types"
 
 # Utils
 require_relative "pdfh/utils/console"
