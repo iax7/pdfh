@@ -87,7 +87,7 @@ module Pdfh
     end
 
     # Gets the text from the pdf in order to execute
-    # the regular expresion matches
+    # the regular expression matches
     # @return [String]
     def extract_text
       temp = Tempfile.new("pdfh")

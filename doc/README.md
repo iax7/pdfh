@@ -126,7 +126,7 @@ def get_month_num(num):
     calendar.month_name[num]
 
 class Document(object):
-    """Handles the PDF detected by the rules, and makes tranformations"""
+    """Handles the PDF detected by the rules, and makes transformations"""
     def __init__(self, file, account, **kwargs):
         self._file = file
         self._act = account
@@ -144,7 +144,7 @@ class Document(object):
         if not os.path.exists(self._file):
             raise IOError("I can't find the PDF")
 
-        # Check if aditional XML file exists
+        # Check if additional XML file exists
         self._xml_file = os.path.splitext(self._file)[0]+'.xml'
         if os.path.exists(self._xml_file):
             self._has_xml = True
@@ -321,7 +321,7 @@ class Settings(object):
                 break
 
         if 'conf_path' not in locals():
-            print('{}Error, no configuraton file was found: {}{}{}'
+            print('{}Error, no configuration file was found: {}{}{}'
                   .format(Fore.RED, Fore.MAGENTA, ', '.join(paths), Fore.RESET))
             exit(1)
 
@@ -366,13 +366,13 @@ def get_files(directory=None):
             yield os.path.join(path, pdffile)
 
 def print_ident(field, value, **kwargs):
-    """Print value with the color specified and correct identation.
+    """Print value with the color specified and correct indentation.
 
     Args:
         field (int): The value name
         value (str): The value to print
         color (AnsiFore): The color to use
-        field_width (int): The identation lenght of fields
+        field_width (int): The indentation length of fields
 
     Returns:
         None: No value is returned.

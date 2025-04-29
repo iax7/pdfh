@@ -52,12 +52,12 @@ destination_base_path: ~/PDFs  # Directory where all matching documents will be 
 document_types:
   - name: Document From Bank              # Description
     re_file: '.*MyBankReg\.pdf'           # Regular expression to match its filename
-    re_date: 'al \d{1,2} de (\w+) del? (\d+)' # Date regular expresion
+    re_date: 'al \d{1,2} de (\w+) del? (\d+)' # Date regular expression
     pwd: base64string                     # [OPTIONAL] Password if the document is protected
     store_path: "{year}/bank_docs"        # Relative path to copy this document
     name_template: '{period} {subtype}'   # Template for new filename when copied
     sub_types:                            # [OPTIONAL] In case your need an extra category
-      - name: Account1                       # Regular expresion to match this subtype
+      - name: Account1                       # Regular expression to match this subtype
         month_offset: -1                     # [OPTIONAL] Integer (signed) value to adjust month
 ```
 

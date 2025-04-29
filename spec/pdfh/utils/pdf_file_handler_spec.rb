@@ -16,7 +16,7 @@ RSpec.describe Pdfh::PdfFileHandler do
       allow(Dir).to receive(:exist?).and_return(true)
     end
 
-    it "proccess it" do
+    it "process it" do
       expect(main.process_document(dir_path)).to be_nil
     end
   end
