@@ -70,31 +70,74 @@ module Pdfh
 
       # @param [String] work_directory
       # @return [void]
+      def process_zip_files(work_directory)
+        @settings.zip_types&.each do |zip_type|
+          find_files(work_directory, :zip).each do |file|
+            next unless zip_type.re_file.match?(File.basename(file))
+
+            Pdfh.info " > Processing zip file: #{file.green}"
+            password_opt = "-P #{zip_type.password}" if zip_type.password?
+            `unzip -o #{password_opt} #{file} -d #{work_directory}`
+          end
+        end
+      end
+
+      # @param directory [String]
+      # @param type [String, Symbol]
+      # @return [Array<String>]
+      def find_files(directory, type)
+        glob = File.join(directory, "*.#{type}")
+        Dir.glob(glob)
+      end
+
       def process_directory(work_directory)
         Pdfh.headline(work_directory)
-        processed_count = 0
-        ignored_files = []
-        files = Dir["#{work_directory}/*.pdf"]
+        process_zip_files(work_directory) if @settings.zip_types?
+        processed_result = RunResult.new
+        files = find_files(work_directory, :pdf)
         files.each do |pdf_file|
           type = match_doc_type(pdf_file)
           if type
-            processed_count += 1
             PdfFileHandler.new(pdf_file, type).process_document(settings.base_path)
+            processed_result.add_processed(pdf_file)
           else
-            ignored_files << base_name_no_ext(pdf_file)
+            processed_result.add_ignored(pdf_file)
           end
         end
-        Pdfh.info "  (No files processed)".colorize(:light_black) if processed_count.zero?
-        return unless Pdfh.verbose?
-
-        Pdfh.info "\n  No document type found for these PDF files:" if ignored_files.any?
-        ignored_files.each.with_index(1) { |file, index| Pdfh.ident_print index, file, color: :magenta }
+        print_processing_results(processed_result)
       end
 
       # @return [String]
       def base_name_no_ext(file)
         File.basename(file, File.extname(file))
       end
+
+      def print_processing_results(result)
+        Pdfh.info "  (No files processed)".colorize(:light_black) if result.processed.empty?
+        return unless Pdfh.verbose?
+
+        Pdfh.info "\n  No document type found for these PDF files:" if result.ignored.any?
+        result.ignored.each.with_index(1) do |file, index|
+          Pdfh.ident_print index, base_name_no_ext(file), color: :magenta
+        end
+      end
+    end
+
+    # keeps track of the processed and ignored files
+    class RunResult
+      attr_reader :processed, :ignored
+
+      # @return [self]
+      def initialize
+        @processed = []
+        @ignored = []
+      end
+
+      # @return [void]
+      def add_ignored(file) = @ignored << file
+
+      # @return [void]
+      def add_processed(file) = @processed << file
     end
   end
 end

@@ -5,7 +5,7 @@
 [![Conventional Commits][cc-img]][cc-url]
 [![Current version][gem-img]][gem-url]
 
-Examine all PDF files in Look up directories, remove password (if has one), rename and copy to a new directory using regular expressions.
+Examine all PDF files in lookup directories, remove passwords (if present), rename them, and copy them to a new directory using regular expressions.
 
 ## Installation
 
@@ -20,8 +20,7 @@ You need to install pdf handling dependencies in order to use this gem.
 #### macOS
 
 ```bash
-brew install qpdf # for qpdf
-brew install xpdf # for pdftotext
+brew install qpdf xpdf # < for pdftotext
 ```
 
 #### Fedora
@@ -38,38 +37,58 @@ sudo pacman -S qpdf poppler
 
 ## Usage
 
-After installing this gem you need to create your configuration file on any of the following directories:
-
+After installing this gem, create your configuration file in one of the following directories:
 - `~/.config/pdfh.yml`
 - `~/pdfh.yml`
-- or configure `PDFH_CONFIG_FILE` environment variable
+- or configure the `PDFH_CONFIG_FILE` environment variable
 
+Example configuration:
 ```yaml
 ---
-lookup_dirs:       # Directories where all pdf's are going to be analyzed
+lookup_dirs:                   # Directories where all PDFs will be analyzed
   - ~/Downloads
 destination_base_path: ~/PDFs  # Directory where all matching documents will be copied (MUST exist)
 document_types:
-  - name: Document From Bank              # Description
+  - name: My Bank                         # Description (type)
     re_file: '.*MyBankReg\.pdf'           # Regular expression to match its filename
-    re_date: 'al \d{1,2} de (\w+) del? (\d+)' # Date regular expression
-    pwd: base64string                     # [OPTIONAL] Password if the document is protected
+    re_date: '\d{1,2} de (\w+) de (\d+)'  # Date regular expression
+    pwd: base64_encoded                   # [OPTIONAL] Password if the document is protected
     store_path: "{year}/bank_docs"        # Relative path to copy this document
     name_template: '{period} {subtype}'   # Template for new filename when copied
     sub_types:                            # [OPTIONAL] In case your need an extra category
-      - name: Account1                       # Regular expression to match this subtype
+      - name: AccountX                       # Regular expression to match this subtype
+        re_date: '\d{1,2} de (\w+)'          # [OPTIONAL] Date regular expression
         month_offset: -1                     # [OPTIONAL] Integer (signed) value to adjust month
+zip_types:                     # [OPTIONAL] Zip files to be processed BEFORE the PDFs
+  - name: My Bank 2                          # Description
+    re_file: 'Document_MR5664_\d+_\d+.zip'   # Regular expression to match its filename
+    pwd: base64_encoded                      # [OPTIONAL] Password if the document is protected
 ```
+
+> [!CAUTION]
+> `pwd` is not encrypted, so be careful with this option. It is stored as a base64 string as a very thin layer of obfuscation.
+> You can use `echo -n 'password' | base64` to encode your password.
 
 **Store Path** and **Name Template** supported placeholders:
 
-- `{original}` Original filename
-- `{period}` 2022-01
-- `{year}` 2022
-- `{month}` 01
-- `{type}` document_type.name
-- `{subtype}` subtype.name if matched
-- `{extra}` day if provided/matched
+Placeholder | Description               | Example
+--- |---------------------------| ---
+`{original}` | Original filename         | MyBankDocument2.pdf
+`{period}`   | Year-Month                | 2022-01
+`{year}`     | Year                      | 2022
+`{month}`    | Month                     | 01
+`{type}`     | Document type **name**    | My Bank
+`{subtype}`  | Sub type **name**         | AccountX
+`{extra}`    | day if captured/matched   | 01
+
+`period`, `year`, `month` and `{extra}` are calculated from the date captured by the regular expression.
+
+### Examples
+
+Date text | RegEx | Captured
+--- | --- | ---
+`01/02/2025` | `(?<d>\d{2}\/(?<m>\d{2})\/(?<y>\d{4})` | d: `01` m: `02` y: `2025`
+`072025 - ` | `(?<m>\d{2})(?<y>\d{4}) -` | m: `07` y: `2025`
 
 ## Development
 
@@ -84,6 +103,15 @@ rake install
 build pdfh.gemspec
 gem install pdfh-*
 ```
+
+To release a new version, run:
+
+```bash
+rake bump
+rake release
+```
+
+This will create a git tag for the version, push git commits and tags, and upload the `.gem` file to rubygems.org.
 
 ### Conventional Commits
 

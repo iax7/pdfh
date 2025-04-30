@@ -44,4 +44,43 @@ RSpec.describe Pdfh::Concerns::PasswordDecodable do
       end
     end
   end
+
+  describe "#password?" do
+    context "when pwd is nil" do
+      subject { test_class.new(nil) }
+
+      it "returns false" do
+        expect(subject.password?).to be false
+      end
+    end
+
+    context "when pwd is empty" do
+      subject { test_class.new("") }
+
+      it "returns false" do
+        expect(subject.password?).to be false
+      end
+    end
+
+    context "when pwd is base64 invalid" do
+      subject { test_class.new(original_password) }
+
+      let(:original_password) { "secretpassword" }
+
+      it "returns false" do
+        expect(subject.password?).to be false
+      end
+    end
+
+    context "when pwd is valid" do
+      subject { test_class.new(encoded_password) }
+
+      let(:original_password) { "secretpassword" }
+      let(:encoded_password) { Base64.strict_encode64(original_password) }
+
+      it "returns false" do
+        expect(subject.password?).to be true
+      end
+    end
+  end
 end

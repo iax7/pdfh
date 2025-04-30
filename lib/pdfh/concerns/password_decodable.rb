@@ -14,11 +14,17 @@ module Pdfh
         pwd
       end
 
+      # @return [Boolean]
+      def password?
+        base64?
+      end
+
       private
 
       # @return [boolean]
       def base64?
-        pwd.is_a?(String) && Base64.strict_encode64(Base64.decode64(pwd)) == pwd
+        pwd.is_a?(String) && pwd.size.positive? &&
+          Base64.strict_encode64(Base64.decode64(pwd)) == pwd
       end
     end
   end
