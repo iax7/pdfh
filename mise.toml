@@ -1,2 +1,9 @@
 [tools]
-ruby = "3.4.3"
+ruby = "3.4"
+
+[tasks]
+update = "bundle outdated && bundle update && bundle update --bundler"
+update-tools = "pre-commit autoupdate"
+pre = "pre-commit run --all-files"
+lint = "bundle exec rubocop"
+test = "bundle exec rspec"

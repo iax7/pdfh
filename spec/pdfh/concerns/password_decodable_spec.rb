@@ -6,6 +6,7 @@ RSpec.describe Pdfh::Concerns::PasswordDecodable do
   let(:test_class) do
     Class.new do
       include Pdfh::Concerns::PasswordDecodable
+
       attr_accessor :pwd
 
       def initialize(pwd)

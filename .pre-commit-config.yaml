@@ -6,30 +6,38 @@ default_install_hook_types:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
         exclude: ^.idea/
       - id: check-yaml
       - id: check-added-large-files
+        args: [--maxkb=1000]
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: mixed-line-ending
+        args: [--fix=lf]
+
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.25.0
+    rev: v8.29.0
     hooks:
       - id: gitleaks
+
   - repo: https://github.com/rubocop/rubocop
-    rev: v1.75.4
+    rev: v1.81.7
     hooks:
       - id: rubocop
+        args: [--parallel]
+
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.1.0
+    rev: v4.3.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: []
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
