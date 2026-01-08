@@ -5,7 +5,7 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in pdfh.gemspec
 gemspec
 
-gem "bundler", "~> 2.0"
+gem "bundler", "~> 4.0"
 gem "code-scanning-rubocop", "~> 0.5"
 gem "debug", "~> 1.8"
 gem "factory_bot", "~> 6.2"
