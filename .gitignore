@@ -8,6 +8,9 @@ spec/reports/
 spec/coverage/
 tmp/
 
+# IDE
+.idea/
+
 # rspec failure tracking
 .rspec_status
 

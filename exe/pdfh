@@ -8,5 +8,5 @@ exit(1) if Pdfh::Utils::DependencyValidator.missing?(*Pdfh::REQUIRED_CMDS)
 begin
   Pdfh::Main.start(argv: ARGV)
 rescue StandardError => e
-  Pdfh.error_print e.message
+  Pdfh.logger.error_print e.message
 end

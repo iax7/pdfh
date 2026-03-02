@@ -41,10 +41,10 @@ module Pdfh
       exit 1 if exit_app
     end
 
-    # @param e [StandardError]
+    # @param error [StandardError]
     # @return [void]
-    def backtrace_print(e)
-      e.backtrace&.each do |line|
+    def backtrace_print(error)
+      error.backtrace&.each do |line|
         output "  ↳ #{line.sub("#{Dir.pwd}/", "")}".colorize(:light_black)
       end
     end
@@ -87,12 +87,12 @@ module Pdfh
       nil
     end
 
-    private
-
     # @return [boolean]
     def verbose?
       @verbose
     end
+
+    private
 
     # @return [void]
     def output(msg)

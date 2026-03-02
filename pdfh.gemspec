@@ -10,11 +10,11 @@ Gem::Specification.new do |spec|
   spec.email         = ["iax7@users.noreply.github.com"]
 
   spec.summary       = "Organize PDF files"
-  spec.description   = "Examine all PDF files in Look up directories, remove password (if has one), " \
-                       "rename and copy to a new directory using regular expressions."
+  spec.description   = "Examine all PDF files in lookup directories, identify them using regular expressions, " \
+                       "rename and copy to organized directories."
   spec.homepage      = "https://github.com/iax7/pdfh"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.2.0")
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 

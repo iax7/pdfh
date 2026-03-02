@@ -3,7 +3,7 @@
 RSpec.describe Pdfh::RenameValidator do
   subject(:validator) { described_class.new(name_template) }
 
-  let(:name_template) { "document {original}-{period}-{YEAR}-{month}-{type}-{subtype}-{extra}" }
+  let(:name_template) { "document {original}-{period}-{year}-{month}-{name}-{quarter}-{bimester}-{day}" }
 
   describe "#initialize" do
     context "when name template is all valid" do
@@ -43,18 +43,18 @@ RSpec.describe Pdfh::RenameValidator do
 
   describe "#types" do
     it "returns the keys of RENAME_TYPES" do
-      expect(validator.types).to eq(%w[original period year month type subtype extra])
+      expect(validator.types).to eq(%w[original period year month quarter bimester name day])
     end
   end
 
   describe "#gsub" do
     let(:values) do
-      { original: "orig", period: "2022-03", year: 2024, month: 7, type: "invoice", subtype: "electricity",
-     extra: "extra" }.freeze
+      { original: "orig", period: "2022-03", year: 2024, month: 7, name: "invoice", quarter: "Q1",
+     bimester: "B1", day: "15" }.freeze
     end
 
     it "returns a new name based on the name template and provided values" do
-      expect(validator.gsub(values)).to eq("document orig-2022-03-2024-7-invoice-electricity-extra")
+      expect(validator.gsub(values)).to eq("document orig-2022-03-2024-7-invoice-Q1-B1-15")
     end
   end
 end

@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
-require "bundler/setup"
-require "pry"
-# Load support files
-Dir[File.expand_path(File.join("spec", "support", "**", "*.rb"))].each { |f| require f }
+require_relative "support/simplecov_setup"
 
+require "bundler/setup"
 require "pdfh"
 require_relative "shared_config"
+
+# Load other support files (excluding simplecov_setup which is already loaded)
+Dir[File.expand_path("spec/support/**/*.rb")].each do |f|
+  require f unless f.end_with?("simplecov_setup.rb")
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -19,7 +22,12 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  config.warnings = false
+
   config.before do
-    stub_const("ENV", ENV.to_hash.merge("PDFH_CONFIG_FILE" => nil))
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("PDFH_CONFIG_FILE").and_return(nil)
+    allow(ENV).to receive(:fetch).and_call_original
+    allow(ENV).to receive(:fetch).with("PDFH_CONFIG_FILE", anything).and_return(nil)
   end
 end
