@@ -5,6 +5,8 @@ module Pdfh
   class DocumentType
     include Concerns::PasswordDecodable
 
+    REQUIRED_FIELDS = %i[name re_file re_date store_path].freeze
+
     # @!attribute [r] name
     #   @return [String] The name of the document type.
     # @!attribute [r] re_file

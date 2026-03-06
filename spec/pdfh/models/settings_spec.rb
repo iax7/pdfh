@@ -8,8 +8,10 @@ RSpec.describe Pdfh::Settings do
       lookup_dirs: %w[/tmp/dir1 /tmp/dir2],
       destination_base_path: "/tmp/destination",
       document_types: [
-        { id: "type1", name: "Type 1", file_pattern: "pattern1_.*\\.pdf" },
-        { id: "type2", name: "Type 2", file_pattern: "pattern2_.*\\.pdf" }
+        { id: "type1", name: "type1", re_file: "pattern1_.*\\.pdf", re_date: "\\d{4}-\\d{2}",
+store_path: "type1/{year}" },
+        { id: "type2", name: "type2", re_file: "pattern2_.*\\.pdf", re_date: "\\d{4}-\\d{2}",
+store_path: "type2/{year}" }
       ]
     }
   end
@@ -21,6 +23,7 @@ RSpec.describe Pdfh::Settings do
 
     # Mock Pdfh module methods
     allow(Pdfh).to receive(:debug)
+    allow(Pdfh).to receive(:info)
     allow(Pdfh).to receive(:error_print)
     allow(Pdfh).to receive(:backtrace_print)
     allow(Pdfh).to receive(:verbose?)

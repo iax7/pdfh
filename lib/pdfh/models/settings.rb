@@ -68,12 +68,26 @@ module Pdfh
     # @return [void]
     def build_doc_types(doc_types)
       @document_types = doc_types.each_with_object({}) do |data, result|
+        next if missing_required_fields?(data)
+
         doc_type = DocumentType.new(data)
         result.store(doc_type.gid, doc_type)
       rescue ArgumentError => e
         Pdfh.error_print e.message, exit_app: false
         Pdfh.backtrace_print e if Pdfh.verbose?
       end
+    end
+
+    def missing_required_fields?(data)
+      missing_fields = DocumentType::REQUIRED_FIELDS.select { |field| data[field].nil? || data[field].to_s.empty? }
+      if missing_fields.any?
+        type_name = data[:name] || "Unnamed type"
+        missing_fields_names = missing_fields.join(", ")
+        Pdfh.info format("Skipping document type %<type_name>s. Missing required fields: %<missing_fields>s",
+                         type_name: type_name.colorize(:green),
+                         missing_fields: missing_fields_names.colorize(:red))
+      end
+      missing_fields.any?
     end
 
     # @param zip_types [Array<Hash>]
