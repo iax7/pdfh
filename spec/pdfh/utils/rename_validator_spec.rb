@@ -47,6 +47,22 @@ RSpec.describe Pdfh::RenameValidator do
     end
   end
 
+  describe "#unknown_list" do
+    context "when there are no unknown tokens" do
+      it "returns an empty string" do
+        expect(validator.unknown_list).to eq("")
+      end
+    end
+
+    context "when there are unknown tokens" do
+      let(:name_template) { "{foo}-{bar}" }
+
+      it "returns unknown tokens joined by ', '" do
+        expect(validator.unknown_list).to eq("foo, bar")
+      end
+    end
+  end
+
   describe "#gsub" do
     let(:values) do
       { original: "orig", period: "2022-03", year: 2024, month: 7, name: "invoice", quarter: "Q1",

@@ -1,48 +1,30 @@
 # frozen_string_literal: true
 
 module Pdfh
-  # Handles the PDF detected by the rules
+  # Lightweight struct that connects a PDF file with its matched document type and
+  # extracted text. All file metadata, date interpretation, and rename resolution
+  # are accessible through dedicated value objects (FileInfo, DateInfo).
   class Document
-    # @!attribute [r] text
-    #   @return [String] The extracted text from the PDF
+    # @!attribute [r] file_info
+    #   @return [FileInfo] File metadata wrapper
     # @!attribute [r] type
-    #   @return [DocumentType] The type of the document
-    # @!attribute [r] file
-    #   @return [File] The file object
-    # @!attribute [r] date_captures
-    #   @return [Hash] The captured date components from regex
-    attr_reader :text, :type, :file, :date_captures
+    #   @return [DocumentType] Matched document type
+    # @!attribute [r] text
+    #   @return [String] Extracted text from the PDF
+    # @!attribute [r] date_info
+    #   @return [DateInfo] Parsed date value object
+    attr_reader :file_info, :type, :text, :date_info
 
     # @param file [String] Path to the PDF file
     # @param type [DocumentType] Type of the document
     # @param text [String] Extracted text from the PDF
-    # @param date_captures [Hash] Captured date components from regex
+    # @param date_captures [Hash{String => String}] Captured date components from regex
     # @return [self] A new Document instance
     def initialize(file, type, text, date_captures)
-      @file = File.new(file)
       @type = type
       @text = text
-      @date_captures = date_captures
-    end
-
-    # @return [String] File name without extension
-    def file_name_only
-      File.basename(@file, file_extension)
-    end
-
-    # @return [String] File extension including the dot (e.g., ".pdf")
-    def file_extension
-      File.extname(@file)
-    end
-
-    # @return [String] Complete file name
-    def file_name
-      File.basename(@file)
-    end
-
-    # @return [String] Backup file name with .bkp extension
-    def backup_name
-      "#{file_name}.bkp"
+      @file_info = FileInfo.new(file)
+      @date_info = DateInfo.new(date_captures)
     end
 
     # @return [String] Document type name or "N/A" if type is nil
@@ -50,75 +32,36 @@ module Pdfh
       type&.name || "N/A"
     end
 
-    # @return [Integer] Normalized month number (1-12)
-    def month
-      @month ||= Month.normalize_to_i(@date_captures["m"])
-    end
-
-    # Q1: Jan-Mar, Q2: Apr-Jun, Q3: Jul-Sep, Q4: Oct-Dec
-    # @return [Integer] Quarter (1-4) based on the month
-    def quarter
-      @quarter ||= ((month - 1) / 3) + 1
-    end
-
-    # B1: Jan-Feb, B2: Mar-Apr, B3: May-Jun, B4: Jul-Aug, B5: Sep-Oct, B6: Nov-Dec
-    # @return [Integer] Bimester (1-6) based on the month
-    def bimester
-      @bimester ||= ((month - 1) / 2) + 1
-    end
-
-    # @return [Integer] Full year (e.g., 2024)
-    def year
-      return @year if @year
-
-      raw_year = @date_captures["y"]
-      @year = (raw_year.size == 2 ? "20#{raw_year}" : raw_year).to_i
-    end
-
-    # @return [String, nil] Day of month if captured, nil otherwise
-    def day
-      @date_captures["d"]
-    end
-
-    # @return [String] Period in format "YYYY-MM"
-    def period
-      "#{year}-#{month.to_s.rjust(2, "0")}"
-    end
-
-    # Used to replace variables in the rename pattern i.e {original}, {period}, etc.
-    # @return [Hash{Symbol=>String}] Hash containing rename variables
-    def rename_data
-      {
-        original: file_name_only,
-        period: period,
-        year: year.to_s,
-        month: month.to_s,
-        quarter: "Q#{quarter}",
-        bimester: "B#{bimester}",
-        name: type_name,
-        day: day || ""
-      }.freeze
-    end
-
-    # @return [String] New file name with extension
-    def new_name
-      new_name = type.name_validator.gsub(rename_data)
-      "#{new_name}#{file_extension}"
-    end
-
-    # @return [String] Storage path for the document
-    def store_path
-      type.path_validator.gsub(rename_data)
-    end
-
-    # @return [String] Directory path containing the file
-    def home_dir
-      File.dirname(@file)
-    end
-
     # @return [String] File name
     def to_s
-      file_name
+      file_info.name
+    end
+
+    # @return [String] New file name with extension (e.g., "2024-01 Cuenta.pdf")
+    def new_name
+      "#{@type.name_validator.gsub(rename_data)}#{@file_info.extension}"
+    end
+
+    # @return [String] Storage path for the document (e.g., "2024/Edo Cuenta")
+    def store_path
+      @type.path_validator.gsub(rename_data)
+    end
+
+    private
+
+    # Used to replace variables in the rename pattern i.e {original}, {period}, etc.
+    # @return [Hash{Symbol => String}] Hash containing rename variables
+    def rename_data
+      @rename_data ||= {
+        original: @file_info.stem,
+        period: @date_info.period,
+        year: @date_info.year.to_s,
+        month: @date_info.month.to_s,
+        quarter: "Q#{@date_info.quarter}",
+        bimester: "B#{@date_info.bimester}",
+        name: @type.name,
+        day: @date_info.day || ""
+      }.freeze
     end
   end
 end

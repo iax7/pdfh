@@ -13,20 +13,27 @@ RSpec.describe Pdfh::Services::DocumentManager do
     )
   end
 
-  let(:file) { instance_double(File, path: file_path) }
+  let(:file_info) do
+    instance_double(
+      Pdfh::FileInfo,
+      path: file_path,
+      name: "cuenta.pdf",
+      extension: ".pdf",
+      stem: "cuenta",
+      dir: File.dirname(file_path)
+    )
+  end
+
+  let(:date_info) { instance_double(Pdfh::DateInfo, period: "2024-01") }
 
   let(:document) do
     instance_double(
       Pdfh::Document,
-      file: file,
+      file_info: file_info,
+      date_info: date_info,
       type: document_type,
       store_path: "2024/Cuenta",
-      new_name: "2024-01 Cuenta.pdf",
-      file_extension: ".pdf",
-      file_name_only: "cuenta",
-      file_name: "cuenta.pdf",
-      home_dir: File.dirname(file_path),
-      period: "2024-01"
+      new_name: "2024-01 Cuenta.pdf"
     )
   end
 
@@ -130,18 +137,25 @@ RSpec.describe Pdfh::Services::DocumentManager do
 
       context "with companion files (PDF has _unlocked suffix)" do
         let(:unlocked_file_path) { File.expand_path("spec/fixtures/cuenta_unlocked.pdf") }
+        let(:unlocked_file_info) do
+          instance_double(
+            Pdfh::FileInfo,
+            path: unlocked_file_path,
+            name: "cuenta_unlocked.pdf",
+            extension: ".pdf",
+            stem: "cuenta_unlocked",
+            dir: File.dirname(unlocked_file_path)
+          )
+        end
+
         let(:unlocked_document) do
           instance_double(
             Pdfh::Document,
-            file: instance_double(File, path: unlocked_file_path),
+            file_info: unlocked_file_info,
+            date_info: date_info,
             type: document_type,
             store_path: "2024/Cuenta",
-            new_name: "2024-01 Cuenta.pdf",
-            file_extension: ".pdf",
-            file_name_only: "cuenta_unlocked",
-            file_name: "cuenta_unlocked.pdf",
-            home_dir: File.dirname(unlocked_file_path),
-            period: "2024-01"
+            new_name: "2024-01 Cuenta.pdf"
           )
         end
 

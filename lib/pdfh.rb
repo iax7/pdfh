@@ -19,6 +19,8 @@ require_relative "pdfh/utils/console"
 require_relative "pdfh/utils/dependency_validator"
 require_relative "pdfh/utils/month"
 require_relative "pdfh/utils/rename_validator"
+require_relative "pdfh/utils/file_info"
+require_relative "pdfh/utils/date_info"
 
 # Services
 require_relative "pdfh/services/directory_scanner"
