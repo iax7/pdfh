@@ -30,9 +30,9 @@ module Pdfh
 
       private
 
-      # @!attribute [rw] document
+      # @!attribute [r] document
       #   @return [Document]
-      attr_accessor :document
+      attr_reader :document
 
       # @return [Boolean]
       def dry_run? = @dry_run
@@ -80,7 +80,7 @@ module Pdfh
 
       # @return [void]
       def backup_original
-        source_file = @document.file_info.path
+        source_file = document.file_info.path
         backup_file = "#{source_file}.bkp"
 
         FileUtils.mv(source_file, backup_file) unless dry_run?
@@ -95,11 +95,11 @@ module Pdfh
       #   # If document is "cuenta_unlocked.pdf", searches for "cuenta.*"
       #   # Returns ["cuenta.xml", "cuenta.txt"] (excluding "cuenta.pdf")
       def companion_files
-        dir = @document.file_info.dir
-        base_name = @document.file_info.stem.delete_suffix(PDF_UNLOCKED_MAGIC_SUFFIX)
-
-        Dir.glob(File.join(dir, "#{base_name}.*")).reject do |file|
-          File.extname(file) == ".pdf"
+        @companion_files ||= begin
+          base_name = document.file_info.stem.delete_suffix(PDF_UNLOCKED_MAGIC_SUFFIX)
+          Dir.glob(File.join(document.file_info.dir, "#{base_name}.*")).reject do |file|
+            File.extname(file) == ".pdf"
+          end
         end
       end
 
