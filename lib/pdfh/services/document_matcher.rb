@@ -15,7 +15,7 @@ module Pdfh
       # @return [Array<Document>]
       def match(file, text)
         @document_types.each_with_object([]) do |type, matches|
-          # Try to match the document type by ID (filename or content)
+          # Try to match the document type by ID (content)
           next unless type.re_id.match?(text)
 
           Pdfh.logger.debug "Matched document type: #{type.name}"
@@ -40,23 +40,17 @@ module Pdfh
       # @param match_data [MatchData]
       # @return [Hash{String => String}] Hash with keys 'm' (month), 'y' (year), 'd' (day)
       def extract_date_captures(match_data)
-        captures = {}
-
-        # Try named captures first (preferred method)
         if match_data.names.any?
-          captures = match_data.named_captures
-          Pdfh.logger.debug "Using #{"named".colorize(:green)} captures: #{captures.inspect}"
-        else
-          # Fall back to positional captures
-          # Assume order: [month, year, day?]
-          captured_values = match_data.captures
-          captures["m"] = captured_values[0] if captured_values[0]
-          captures["y"] = captured_values[1] if captured_values[1]
-          captures["d"] = captured_values[2] if captured_values[2]
-          Pdfh.logger.debug "Using #{"positional".colorize(:red)} captures: #{captures.inspect}"
+          Pdfh.logger.debug "Using #{"named".colorize(:green)} captures: #{match_data.named_captures.inspect}"
+          return match_data.named_captures
         end
 
-        captures
+        # Fall back to positional captures — assume order: [month, year, day?]
+        {}.tap do |c|
+          c["m"], c["y"], c["d"] = match_data.captures
+          c.compact!
+          Pdfh.logger.debug "Using #{"positional".colorize(:red)} captures: #{c.inspect}"
+        end
       end
     end
   end

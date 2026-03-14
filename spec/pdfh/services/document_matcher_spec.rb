@@ -4,7 +4,11 @@ RSpec.describe Pdfh::Services::DocumentMatcher do
   let(:file_path) { File.expand_path("spec/fixtures/cuenta.pdf") }
   let(:mock_logger) { instance_double(Pdfh::Console, debug: nil) }
   before do
+    @original_logger = Pdfh.logger
     Pdfh.logger = mock_logger
+  end
+  after do
+    Pdfh.logger = @original_logger
   end
   describe "#match" do
     context "with named captures in regex" do
@@ -64,13 +68,13 @@ RSpec.describe Pdfh::Services::DocumentMatcher do
       end
     end
     context "with 3 positional captures (month, year, day)" do
-      let(:text) { "document from 15/06/2024" }
+      let(:text) { "document from 06/2024/15" }
       let(:type) do
         instance_double(
           Pdfh::DocumentType,
           name: "Full Date Doc",
           re_id: /document/,
-          re_date: %r{(\d{2})/(\d{2})/(\d{4})} # day/month/year
+          re_date: %r{(\d{2})/(\d{4})/(\d{2})} # month/year/day
         )
       end
       let(:matcher) { described_class.new([type]) }
@@ -79,7 +83,7 @@ RSpec.describe Pdfh::Services::DocumentMatcher do
           file_path,
           type,
           text,
-          hash_including("m" => "15", "y" => "06", "d" => "2024")
+          hash_including("m" => "06", "y" => "2024", "d" => "15")
         ).and_call_original
         matcher.match(file_path, text)
       end
