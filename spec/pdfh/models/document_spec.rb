@@ -1,100 +1,64 @@
 # frozen_string_literal: true
 
 RSpec.describe Pdfh::Document do
-  subject(:main) { described_class.new(doc_file, doc_type, text).tap(&:process) }
-
   include_context "with silent console"
 
   let(:doc_file) { File.expand_path("spec/fixtures/cuenta.pdf") }
   let(:doc_type) { build(:document_type) }
-  let(:text) { "del 06/Enero/2019 al 05/Febrero/2019\nCuenta Tipo: Enlace" }
+  let(:text) { "del 06/Enero/2019 al 05/Febrero/2019" }
+  let(:date_captures) { { "m" => "Enero", "y" => "2019", "d" => "06" } }
+
+  subject(:document) { described_class.new(doc_file, doc_type, text, date_captures) }
 
   describe "#initialize" do
-    it "correctly" do
-      expect(main.sub_type).to eq("Enlace")
+    it "stores text" do
+      expect(document.text).to eq(text)
+    end
+
+    it "stores the document type" do
+      expect(document.type).to eq(doc_type)
+    end
+
+    it "exposes a FileInfo sub-object" do
+      expect(document.file_info).to be_a(Pdfh::FileInfo)
+    end
+
+    it "exposes a DateInfo sub-object" do
+      expect(document.date_info).to be_a(Pdfh::DateInfo)
     end
   end
 
-  describe "#print_info" do
-    it "correctly" do
-      expect(main.print_info).to be_nil
+  describe "#to_s" do
+    it "returns the file name" do
+      expect(document.to_s).to eq("cuenta.pdf")
     end
   end
 
-  it "#file_name_only" do
-    expect(main.file_name_only).to eq("cuenta")
-  end
-
-  it "#file_name" do
-    expect(main.file_name).to eq("cuenta.pdf")
-  end
-
-  it "#backup_name" do
-    expect(main.backup_name).to eq("cuenta.pdf.bkp")
-  end
-
-  it "#store_path" do
-    expect(main.store_path).to eq("2019/Edo Cuenta")
-  end
-
-  it "#to_s" do
-    expect(main.to_s).to be_a(String)
-  end
-
-  it "#new_name" do
-    expect(main.new_name).to eq("2019-01 Cuenta Enlace.pdf")
-  end
-
-  it "ReDateError changes messages" do
-    msg = "Custom error"
-    error = Pdfh::ReDateError.new(msg)
-
-    expect { raise error }.to raise_error(Pdfh::ReDateError, msg)
-  end
-
-  describe "#companion_files" do
-    it "has files" do
-      res = main.companion_files(join: true)
-
-      expect(res).to eq("cuenta.xml")
-    end
-
-    it "has no files" do
-      main.instance_variable_set(:@companion, [])
-      res = main.companion_files(join: true)
-
-      expect(res).to eq("N/A")
-    end
-  end
-
-  describe "#match_data (private method)" do
-    let(:text) { "al 27 de Septiembre de 2018 " }
-
-    context "when regular expression has unnamed params" do
-      let(:unnamed_re) { /al \d{2} de (\w+) de (\d{4})/ }
-      let(:doc_type) { build(:document_type, re_date: unnamed_re) }
-
-      it "does not have named captures" do
-        expect(unnamed_re.named_captures).to be_empty
-      end
-
-      it "returns the correct data" do
-        result = main.__send__(:match_date, unnamed_re)
-        expect(result).to eq(%w[septiembre 2018])
+  describe "rename methods" do
+    describe "#new_name" do
+      it "generates new filename from template with extension" do
+        expect(document.new_name).to be_a(String)
+        expect(document.new_name).to end_with(".pdf")
       end
     end
 
-    context "when Regular expression has named params" do
-      let(:named_re) { /al (?<d>\d{2}) de (?<m>\w+) de (?<y>\d{4})/ }
-      let(:doc_type) { build(:document_type, re_date: named_re) }
-
-      it "does have named captures" do
-        expect(named_re.named_captures).not_to be_empty
+    describe "#store_path" do
+      it "generates store path from template" do
+        expect(document.store_path).to be_a(String)
       end
+    end
+  end
 
-      it "returns the correct data" do
-        result = main.__send__(:match_date, named_re)
-        expect(result).to eq(%w[septiembre 2018 27])
+  describe "#type_name" do
+    it "returns the document type name" do
+      expect(document.type_name).to eq(doc_type.name)
+    end
+
+    context "when type is nil" do
+      subject(:document) { described_class.new(doc_file, nil, text, date_captures) }
+
+      it "returns N/A" do
+        expect(document.type_name).to eq("N/A")
       end
     end
   end

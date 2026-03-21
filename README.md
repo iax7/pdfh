@@ -5,7 +5,7 @@
 [![Conventional Commits][cc-img]][cc-url]
 [![Current version][gem-img]][gem-url]
 
-Examine all PDF files in lookup directories, remove passwords (if present), rename them, and copy them to a new directory using regular expressions.
+Examine all PDF files in lookup directories, identify them using regular expressions, rename them, and copy them to organized directories.
 
 ## Installation
 
@@ -15,34 +15,52 @@ gem install pdfh
 
 ### Dependencies
 
-You need to install pdf handling dependencies in order to use this gem.
+You need to install `pdftotext` to extract text from PDF files.
 
 #### macOS
 
 ```bash
-brew install qpdf xpdf # < for pdftotext
+brew install xpdf
 ```
 
 #### Fedora
 
 ```bash
-sudo dnf install -y qpdf poppler-utils
+sudo dnf install -y poppler-utils
 ```
 
 #### Arch
 
 ```bash
-sudo pacman -S qpdf poppler
+sudo pacman -S poppler
 ```
 
 ## Usage
 
 After installing this gem, create your configuration file in one of the following directories:
+
 - `~/.config/pdfh.yml`
 - `~/pdfh.yml`
 - or configure the `PDFH_CONFIG_FILE` environment variable
 
+Then run:
+
+```bash
+pdfh
+```
+
+The tool will:
+
+1. Scan all PDFs in the configured `lookup_dirs`
+2. Extract text from each PDF using `pdftotext`
+3. Match the extracted text from each PDF against your configured `document_types` (via `re_id`)
+4. Copy matched documents to organized directories within `destination_base_path`
+5. Rename files according to your `name_template`
+
+### Configuration
+
 Example configuration:
+
 ```yaml
 ---
 lookup_dirs:                   # Directories where all PDFs will be analyzed
@@ -50,45 +68,42 @@ lookup_dirs:                   # Directories where all PDFs will be analyzed
 destination_base_path: ~/PDFs  # Directory where all matching documents will be copied (MUST exist)
 document_types:
   - name: My Bank                         # Description (type)
-    re_file: '.*MyBankReg\.pdf'           # Regular expression to match its filename
-    re_date: '\d{1,2} de (\w+) de (\d+)'  # Date regular expression
-    pwd: base64_encoded                   # [OPTIONAL] Password if the document is protected
+    re_id: 'Account ID: 12334-\w{3}'      # [OPTIONAL (uses name as fallback)] RegEx to match from PDF content as document identifier
+    re_date: '\d{1,2} de (\w+) de (\d+)'  # Date RegEx (to extract from PDF content)
     store_path: "{year}/bank_docs"        # Relative path to copy this document
-    name_template: '{period} {subtype}'   # Template for new filename when copied
-    sub_types:                            # [OPTIONAL] In case your need an extra category
-      - name: AccountX                       # Regular expression to match this subtype
-        re_date: '\d{1,2} de (\w+)'          # [OPTIONAL] Date regular expression
-        month_offset: -1                     # [OPTIONAL] Integer (signed) value to adjust month
-zip_types:                     # [OPTIONAL] Zip files to be processed BEFORE the PDFs
-  - name: My Bank 2                          # Description
-    re_file: 'Document_MR5664_\d+_\d+.zip'   # Regular expression to match its filename
-    pwd: base64_encoded                      # [OPTIONAL] Password if the document is protected
+    name_template: '{period} {name}'      # [OPTIONAL] Template for new filename when copied
 ```
 
-> [!CAUTION]
-> `pwd` is not encrypted, so be careful with this option. It is stored as a base64 string as a very thin layer of obfuscation.
-> You can use `echo -n 'password' | base64` to encode your password.
+### Placeholders
 
-**Store Path** and **Name Template** supported placeholders:
+**Store Path** and **Name Template** support the following placeholders:
 
-Placeholder | Description               | Example
---- |---------------------------| ---
-`{original}` | Original filename         | MyBankDocument2.pdf
-`{period}`   | Year-Month                | 2022-01
-`{year}`     | Year                      | 2022
-`{month}`    | Month                     | 01
-`{type}`     | Document type **name**    | My Bank
-`{subtype}`  | Sub type **name**         | AccountX
-`{extra}`    | day if captured/matched   | 01
+| Placeholder | Description | Example |
+| --- | --- | --- |
+| `{original}` | Original filename | `MyBankDocument2.pdf` |
+| `{period}` | Year-Month | `2022-07` |
+| `{year}` | Year | `2022` |
+| `{month}` | Month | `07` |
+| `{day}` | Day (if captured) | `01` |
+| `{quarter}` | Quarter (Q1-Q4) | `Q3` |
+| `{bimester}` | Bimester (B1-B6) | `B4` |
+| `{name}` | Document type **name** | `My Bank` |
 
-`period`, `year`, `month` and `{extra}` are calculated from the date captured by the regular expression.
+The `period`, `year`, `month`, `day`, `quarter` and `bimester` placeholders are calculated from the date captured by the `re_date` regular expression.
 
-### Examples
+### Date Extraction Examples
 
-Date text | RegEx | Captured
---- | --- | ---
-`01/02/2025` | `(?<d>\d{2}\/(?<m>\d{2})\/(?<y>\d{4})` | d: `01` m: `02` y: `2025`
-`072025 - ` | `(?<m>\d{2})(?<y>\d{4}) -` | m: `07` y: `2025`
+The `re_date` regex extracts date information from the PDF content:
+
+| Date text | RegEx | Captured |
+| --- | --- | --- |
+| `01/02/2025` | `(?<d>\d{2})\/(?<m>\d{2})\/(?<y>\d{4})` | d: `01` m: `02` y: `2025` |
+| `072025 -` | `(?<m>\d{2})(?<y>\d{4}) -` | m: `07` y: `2025` |
+| `31 de julio de 2025` | `\d{1,2} de (\w+) de (\d+)` | month: `julio` year: `2025` |
+
+Named captures supported: `y` for year, `m` for month, `d` for day.
+
+If named captures are not used, the regex groups will be matched in order: `month`, `year`.
 
 ## Development
 
@@ -132,10 +147,30 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 Everyone interacting in the Pdfh project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/iax7/pdfh/blob/master/CODE_OF_CONDUCT.md).
 
+## Command Options
+
+Run with verbose output:
+
+```bash
+pdfh -v
+```
+
+Run in dry-run mode (no files will be moved):
+
+```bash
+pdfh --dry
+```
+
+Show version:
+
+```bash
+pdfh --version
+```
+
 <!-- Links -->
 [rubocop-img]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml/badge.svg
 [rubocop-url]: https://github.com/iax7/pdfh/actions/workflows/rubocop-analysis.yml
-[ruby-img]: https://img.shields.io/badge/ruby-3.4-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
+[ruby-img]: https://img.shields.io/badge/ruby-4.0-blue?style=flat&logo=ruby&logoColor=CC342D&labelColor=white
 [ruby-url]: https://www.ruby-lang.org/en/
 [cc-img]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=00&labelColor=fff
 [cc-url]: https://conventionalcommits.org

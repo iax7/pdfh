@@ -3,7 +3,6 @@
 require "colorize"
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
-require "versionomy"
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -16,13 +15,32 @@ task :bump, :type do |_t, args|
   version_file = File.join(__dir__, "lib", "pdfh", "version.rb")
   content = File.read(version_file)
 
-  version_pattern = /(?<major>\d+)\.(?<minor>\d+)\.(?<tiny>\d+)/
-  current_version = content.match(version_pattern)
-  next_version    = Versionomy.parse(current_version.to_s).bump(args.type).to_s
+  version_pattern = /VERSION = "(?<major>\d+)\.(?<minor>\d+)\.(?<tiny>\d+)"/
+  match = content.match(version_pattern)
 
-  File.write(version_file, content.gsub(version_pattern, "\\1#{next_version}\\3"))
+  major = match[:major].to_i
+  minor = match[:minor].to_i
+  tiny = match[:tiny].to_i
 
-  puts "Successfully bumped from #{current_version.to_s.red} to #{next_version.green}"
+  case args.type.to_sym
+  when :major
+    major += 1
+    minor = 0
+    tiny = 0
+  when :minor
+    minor += 1
+    tiny = 0
+  when :tiny
+    tiny += 1
+  end
+
+  current_version = "#{match[:major]}.#{match[:minor]}.#{match[:tiny]}"
+  next_version = "#{major}.#{minor}.#{tiny}"
+
+  new_content = content.gsub(version_pattern, "VERSION = \"#{next_version}\"")
+  File.write(version_file, new_content)
+
+  puts "Successfully bumped from #{current_version.red} to #{next_version.green}"
   puts "\n> Building v#{next_version.green}..."
   puts `rake build`
 end

@@ -1,41 +1,42 @@
 # frozen_string_literal: true
 
-require "base64"
-require "colorize"
+# Standard library
 require "fileutils"
-require "forwardable"
 require "tempfile"
 require "yaml"
 
-require_relative "ext/string"
-
-# Concerns
-require_relative "pdfh/concerns/password_decodable"
+# External dependencies
+require "colorize"
 
 # Models
 require_relative "pdfh/models/document"
-require_relative "pdfh/models/document_period"
-require_relative "pdfh/models/document_sub_type"
 require_relative "pdfh/models/document_type"
+require_relative "pdfh/models/run_options"
 require_relative "pdfh/models/settings"
-require_relative "pdfh/models/zip_types"
 
 # Utils
 require_relative "pdfh/utils/console"
 require_relative "pdfh/utils/dependency_validator"
 require_relative "pdfh/utils/month"
-require_relative "pdfh/utils/opt_parser"
-require_relative "pdfh/utils/options"
-require_relative "pdfh/utils/pdf_file_handler"
 require_relative "pdfh/utils/rename_validator"
-require_relative "pdfh/utils/settings_builder"
+require_relative "pdfh/utils/file_info"
+require_relative "pdfh/utils/date_info"
+
+# Services
+require_relative "pdfh/services/directory_scanner"
+require_relative "pdfh/services/opt_parser"
+require_relative "pdfh/services/settings_validator"
+require_relative "pdfh/services/settings_builder"
+require_relative "pdfh/services/pdf_text_extractor"
+require_relative "pdfh/services/document_matcher"
+require_relative "pdfh/services/document_manager"
 
 require_relative "pdfh/main"
-require_relative "pdfh/settings_template"
 require_relative "pdfh/version"
 
 # Gem entry point
 module Pdfh
+  PROGRAM_NAME = "pdfh"
   REQUIRED_CMDS = %i[qpdf pdftotext].freeze
 
   # Settings not found
@@ -43,17 +44,21 @@ module Pdfh
 
   # Regular Date Error, when there is not match
   class ReDateError < StandardError
-    # @return [self]
+    # @param msg [String]
+    # @return [ReDateError]
     def initialize(msg = "Date regular expression did not find a match in document.")
       super
     end
   end
 
   class << self
-    extend Forwardable
+    # @!attribute [w] logger
+    #   @return [Console]
+    attr_writer :logger
 
-    def_delegators :@options, :verbose?, :dry?, :file_mode?
-    def_delegators :@console, :ident_print, :warn_print, :error_print, :backtrace_print, :headline, :debug, :info,
-                   :print_options
+    # @return [Console]
+    def logger
+      @logger ||= Console.new(false)
+    end
   end
 end

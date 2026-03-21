@@ -2,8 +2,25 @@
 ruby = "4.0"
 
 [tasks]
-update = "bundle outdated && bundle update && bundle update --bundler"
-update-tools = "pre-commit autoupdate"
+update = ["! bundle outdated", "bundle update --bundler", "bundle update --all"]
+pre-update-tools = "pre-commit autoupdate"
 pre = "pre-commit run --all-files"
 lint = "bundle exec rubocop"
-test = "bundle exec rspec"
+test = "bundle exec rspec --order random --format documentation"
+
+[tasks.check]
+depends = ["lint", "test"]
+
+[tasks.bump]
+description = "Bump the version of the gem"
+usage = '''
+arg "<type>" help="Version type to bump" {
+  choices "major" "minor" "tiny"
+}
+'''
+run = "bundle exec rake bump[${usage_type?}]"
+
+[tasks.release]
+confirm = 'Are you sure you want to release a new version?'
+description = "Create a git tag, build and push gem to RubyGems"
+run = "bundle exec rake release"

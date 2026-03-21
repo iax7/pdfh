@@ -7,7 +7,7 @@ plugins:
 
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.2
   Exclude:
     - doc/**/*
     - pkg/**/*
@@ -30,3 +30,7 @@ Style/StringLiteralsInInterpolation:
 
 Layout/HashAlignment:
   EnforcedHashRocketStyle: table
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*

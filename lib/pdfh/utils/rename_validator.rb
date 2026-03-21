@@ -8,9 +8,10 @@ module Pdfh
       "period"   => "Year-Month",
       "year"     => "Year",
       "month"    => "Month",
-      "type"     => "Document Type name",
-      "subtype"  => "Document Subtype name",
-      "extra"    => "Extra data extracted from date_re"
+      "quarter"  => "Quarter (Q1-Q4)",
+      "bimester" => "Bimester (B1-B6)",
+      "name"     => "Document Type name",
+      "day"      => "Day of month"
     }.freeze
 
     attr_reader :template, :all, :unknown, :valid
