@@ -43,11 +43,8 @@ RSpec.describe Pdfh::Services::SettingsBuilder do
     context "when ENV var is set with valid path" do
       let(:yaml_file) { File.expand_path("spec/fixtures/settings.yml") }
 
-      around do |example|
-        old_val = ENV.fetch("PDFH_CONFIG_FILE", nil)
-        ENV["PDFH_CONFIG_FILE"] = yaml_file
-        example.run
-        ENV["PDFH_CONFIG_FILE"] = old_val
+      before do
+        allow(ENV).to receive(:fetch).with("PDFH_CONFIG_FILE", anything).and_return(yaml_file)
       end
 
       it "uses the ENV var path" do
@@ -56,11 +53,8 @@ RSpec.describe Pdfh::Services::SettingsBuilder do
     end
 
     context "when ENV var is set with invalid path" do
-      around do |example|
-        old_val = ENV.fetch("PDFH_CONFIG_FILE", nil)
-        ENV["PDFH_CONFIG_FILE"] = "/non/existent/file.yml"
-        example.run
-        ENV["PDFH_CONFIG_FILE"] = old_val
+      before do
+        allow(ENV).to receive(:fetch).with("PDFH_CONFIG_FILE", anything).and_return("/non/existent/file.yml")
       end
 
       it "raises SettingsIOError" do
@@ -200,6 +194,30 @@ RSpec.describe Pdfh::Services::SettingsBuilder do
         builder.send(:search_config_file)
         expect(Pdfh.logger).to have_received(:warn_print).with(/No configuration file was found/)
       end
+    end
+  end
+
+  describe "#stringify_keys" do
+    it "converts symbol keys to strings at top level" do
+      result = builder.send(:stringify_keys, { foo: 1, bar: 2 })
+      expect(result.keys).to all(be_a(String))
+    end
+
+    it "converts symbol keys recursively in nested hashes" do
+      result = builder.send(:stringify_keys, { outer: { inner: "val" } })
+      expect(result["outer"].keys).to all(be_a(String))
+    end
+
+    it "converts symbol keys inside arrays of hashes" do
+      result = builder.send(:stringify_keys, { items: [{ key: "val" }] })
+      expect(result["items"].first.keys).to all(be_a(String))
+    end
+
+    it "produces YAML without Ruby symbol key syntax" do
+      yaml = builder.send(:stringify_keys, Pdfh::Services::SettingsBuilder::SETTINGS_TEMPLATE).to_yaml
+      expect(yaml).not_to match(/^:\w+:/)
+      expect(yaml).to include("lookup_dirs")
+      expect(yaml).to include("document_types")
     end
   end
 end

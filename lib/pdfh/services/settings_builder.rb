@@ -77,10 +77,21 @@ module Pdfh
         full_path = File.join(File.expand_path("~"), default_settings_name)
         return full_path if File.exist?(full_path) # double check
 
-        File.write(full_path, SETTINGS_TEMPLATE.to_yaml)
+        File.write(full_path, stringify_keys(SETTINGS_TEMPLATE).to_yaml)
         Pdfh.logger.info "Default settings file was created: #{full_path.colorize(:green)}"
 
         full_path
+      end
+
+      # Recursively converts symbol keys to string keys for YAML serialization
+      # @param value [Hash, Array, Object]
+      # @return [Hash, Array, Object]
+      def stringify_keys(value)
+        case value
+        when Hash then value.to_h { |k, v| [k.to_s, stringify_keys(v)] }
+        when Array then value.map { |v| stringify_keys(v) }
+        else value
+        end
       end
 
       # Gets the first settings file found, or nil
