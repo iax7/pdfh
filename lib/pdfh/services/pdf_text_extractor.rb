@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "shellwords"
-require "english"
+require "English"
 
 module Pdfh
   module Services
