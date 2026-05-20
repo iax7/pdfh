@@ -59,7 +59,11 @@ Useful `mise` tasks (`mise.toml`):
 ## Processing Flow (High Level)
 
 ```text
-exe/pdfh → Main.start → OptParser → SettingsBuilder → SettingsValidator
+exe/pdfh → DependencyValidator (qpdf, pdftotext) → Main.start
+                                              ↓
+                                   OptParser (ARGV)
+                                              ↓
+                               SettingsBuilder → SettingsValidator
                                                             ↓
                                          DirectoryScanner.scan (finds *.pdf)
                                                             ↓
@@ -76,9 +80,9 @@ Key service objects in `lib/pdfh/services/`:
 - `PdfTextExtractor` — shells out `pdftotext -enc UTF-8 -layout`
 - `DocumentMatcher` — iterates `DocumentType`s; matches `re_id` then `re_date`
 - `DocumentManager` — creates dest dir, copies/renames PDF, copies companion files
-- `SettingsBuilder` — locates and parses `pdfh.yml`
+- `SettingsBuilder` — resolves config from env/known locations (`.yml`/`.yaml`), validates, and builds `Settings`
 - `SettingsValidator` — validates settings; raises `ArgumentError` on fatal errors, warns and skips on soft errors (e.g. missing lookup dirs)
-- `OptParser` — parses `ARGV` into `RunOptions`
+- `OptParser` — parses `ARGV` into `RunOptions`; supports `--list-types` to print configured document type IDs
 
 ## Code Style and Conventions
 
@@ -127,6 +131,7 @@ Side effects and IO:
 - File system changes are centralized in `DocumentManager`.
 - Respect `dry_run` / `--dry` to avoid writing files.
 - When copying/moving files, preserve metadata if possible (`FileUtils` with `preserve: true`).
+- After successful processing, source PDFs are moved to `*.bkp` in place (`DocumentManager#backup_original`).
 
 Testing:
 
@@ -136,7 +141,9 @@ Testing:
 
 ## Configuration and Templates
 
-- Configuration is loaded from `$PDFH_CONFIG_FILE`, then CWD, `~/.config/`, then `~/`.
+- Configuration is loaded from `$PDFH_CONFIG_FILE`, then CWD, then `$XDG_CONFIG_HOME` (default `~/.config`), then `~/`.
+- Supported config file extensions are `.yml` and `.yaml`.
+- If no config file is found, `SettingsBuilder` creates a default template at `~/pdfh.yml`.
 - Document templates use `{placeholder}` tokens defined in `Document#rename_data`.
 - Date regex supports named captures `(?<m>...)` / `(?<y>...)` / `(?<d>...)` or positional captures.
 
@@ -149,7 +156,8 @@ Testing:
 - **v4 breaking change**: Config format changed in v4.0.0 — old configs are incompatible. `re_id` matches PDF *text content* (not filename). New placeholders: `{day}`, `{quarter}`, `{bimester}`, `{name}`.
 - **Multi-match behavior**: PDFs matching more than one `DocumentType` are silently skipped (see `Main.start`).
 - **`_unlocked` suffix**: `DocumentManager` strips `_unlocked` when locating companion files — legacy pattern from `qpdf` unlocking.
-- **Config search path**: `$PDFH_CONFIG_FILE` → CWD → `~/.config/` → `~/`. Error message does not list paths checked.
+- **First run side effect**: Missing config does not fail fast; it auto-creates `~/pdfh.yml` and continues from that template.
+- **Dependency mismatch risk**: `qpdf` is still checked at startup (`exe/pdfh`) even though normal v4 processing does not call it directly.
 - **Colorize in tests**: Logging output is colored via `colorize`; specs mock `Console` with shared context `"with silent console"` to suppress output.
 
 ## Suggested Workflow for Agents
