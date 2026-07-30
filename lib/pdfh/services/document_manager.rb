@@ -89,16 +89,18 @@ module Pdfh
       # Finds companion files by removing the _unlocked suffix from the PDF name if present.
       # This allows PDFs unlock by qpdf to locate their original companion files (e.g., .xml, .txt)
       # that were never renamed with the _unlocked suffix.
+      # Excludes PDF files and `.bkp` backup files (already-processed PDFs renamed by +backup_original+).
       #
-      # @return [Array<String>] array of non-PDF files with the same base name
+      # @return [Array<String>] array of non-PDF, non-backup files with the same base name
       # @example
       #   # If document is "cuenta_unlocked.pdf", searches for "cuenta.*"
-      #   # Returns ["cuenta.xml", "cuenta.txt"] (excluding "cuenta.pdf")
+      #   # Returns ["cuenta.xml", "cuenta.txt"] (excluding "cuenta.pdf" and "cuenta.pdf.bkp")
       def companion_files
         @companion_files ||= begin
           base_name = document.file_info.stem.delete_suffix(PDF_UNLOCKED_MAGIC_SUFFIX)
           Dir.glob(File.join(document.file_info.dir, "#{base_name}.*")).reject do |file|
-            File.extname(file) == ".pdf"
+            ext = File.extname(file)
+            ext == ".pdf" || file.end_with?(".bkp")
           end
         end
       end

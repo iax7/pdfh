@@ -135,6 +135,36 @@ RSpec.describe Pdfh::Services::DocumentManager do
         end
       end
 
+      context "with companion files including bkp files" do
+        before do
+          allow(Dir).to receive(:glob)
+            .with(File.join(File.dirname(file_path), "cuenta.*"))
+            .and_return([
+                          "#{File.dirname(file_path)}/cuenta.xml",
+                          "#{File.dirname(file_path)}/cuenta.pdf",
+                          "#{File.dirname(file_path)}/cuenta.pdf.bkp"
+                        ])
+        end
+
+        it "does not copy .bkp files as companion files" do
+          # Only the main PDF copy + the .xml companion copy = 2 times
+          expect(FileUtils).to receive(:cp).exactly(2).times
+
+          manager.call
+        end
+
+        it "copies xml companion but skips bkp file" do
+          expect(FileUtils).to receive(:cp).with(
+            "#{File.dirname(file_path)}/cuenta.xml",
+            "/destination/2024/Cuenta/2024-01 Cuenta.xml",
+            preserve: true
+          )
+          expect(FileUtils).not_to receive(:cp).with(include(".bkp"), any_args)
+
+          manager.call
+        end
+      end
+
       context "with companion files (PDF has _unlocked suffix)" do
         let(:unlocked_file_path) { File.expand_path("spec/fixtures/cuenta_unlocked.pdf") }
         let(:unlocked_file_info) do
