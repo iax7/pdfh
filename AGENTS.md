@@ -43,9 +43,17 @@ Useful `mise` tasks (`mise.toml`):
 - `mise run test` (runs `bundle exec rspec --order random --format documentation`)
 - `mise run check` (runs lint + test)
 - `mise run bump[major|minor|tiny]`
-- `mise run pre` (runs `pre-commit run --all-files`)
+- `mise run pre` (runs `pre-commit run --all-files`; also runs `gitleaks` and `codespell`, which can block a commit independently of RuboCop/tests)
 - `mise run update` (runs `bundle update`)
 - `mise run release` (builds gem + pushes to RubyGems)
+
+Equivalent `just` recipes (`justfile`) are also available and wrap the same commands:
+
+- `just check` (lint + test)
+- `just test` / `just test-file spec/path_spec.rb:42`
+- `just lint` (runs `rubocop -a`, auto-fixes)
+- `just bump [major|minor|tiny]`
+- `just release`
 
 ## Repository Layout
 
@@ -82,7 +90,7 @@ Key service objects in `lib/pdfh/services/`:
 - `DocumentManager` — creates dest dir, copies/renames PDF, copies companion files
 - `SettingsBuilder` — resolves config from env/known locations (`.yml`/`.yaml`), validates, and builds `Settings`
 - `SettingsValidator` — validates settings; raises `ArgumentError` on fatal errors, warns and skips on soft errors (e.g. missing lookup dirs)
-- `OptParser` — parses `ARGV` into `RunOptions`; supports `--list-types` to print configured document type IDs
+- `OptParser` — parses `ARGV` into `RunOptions`; supports `--list-types`, `-v/--verbose`, `-d/--dry`, `-V/--version`, `-h/--help`
 
 ## Code Style and Conventions
 
@@ -159,6 +167,7 @@ Testing:
 - **First run side effect**: Missing config does not fail fast; it auto-creates `~/pdfh.yml` and continues from that template.
 - **Dependency mismatch risk**: `qpdf` is still checked at startup (`exe/pdfh`) even though normal v4 processing does not call it directly.
 - **Colorize in tests**: Logging output is colored via `colorize`; specs mock `Console` with shared context `"with silent console"` to suppress output.
+- **CI only lints, not tests**: `.github/workflows/rubocop-analysis.yml` is the only CI workflow and runs RuboCop only (via CodeQL/SARIF upload); RSpec is not run in CI. Always run `mise run test` locally — a green CI check does not mean tests pass.
 
 ## Suggested Workflow for Agents
 
@@ -166,6 +175,10 @@ Testing:
 - Prefer minimal changes; update specs alongside behavior changes.
 - Run `mise run lint` and `mise run test` before finalizing changes.
 - Keep changes localized; avoid touching unrelated files.
+
+## Repo Etiquette
+
+- Commit messages must follow Conventional Commits format (e.g. `fix:`, `feat:`, `chore:`) — enforced by the `conventional-pre-commit` `commit-msg` hook in `.pre-commit-config.yaml`. Non-conforming messages are rejected.
 
 ## Examples
 
