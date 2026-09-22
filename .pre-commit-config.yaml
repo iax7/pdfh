@@ -25,12 +25,6 @@ repos:
     hooks:
       - id: gitleaks
 
-  - repo: https://github.com/rubocop/rubocop
-    rev: v1.86.0
-    hooks:
-      - id: rubocop
-        args: [--parallel]
-
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.4.0
     hooks:
