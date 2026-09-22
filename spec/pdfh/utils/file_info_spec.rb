@@ -23,6 +23,14 @@ RSpec.describe Pdfh::FileInfo do
     it "is aliased as name_only" do
       expect(file_info.name_only).to eq("cuenta")
     end
+
+    context "when the file has the _unlocked magic suffix" do
+      let(:file_path) { File.expand_path("spec/fixtures/cuenta_unlocked.pdf") }
+
+      it "removes the _unlocked suffix" do
+        expect(file_info.stem).to eq("cuenta")
+      end
+    end
   end
 
   describe "#extension" do

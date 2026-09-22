@@ -173,7 +173,7 @@ RSpec.describe Pdfh::Services::DocumentManager do
             path: unlocked_file_path,
             name: "cuenta_unlocked.pdf",
             extension: ".pdf",
-            stem: "cuenta_unlocked",
+            stem: "cuenta",
             dir: File.dirname(unlocked_file_path)
           )
         end

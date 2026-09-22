@@ -40,6 +40,15 @@ RSpec.describe Pdfh::Document do
         expect(document.new_name).to be_a(String)
         expect(document.new_name).to end_with(".pdf")
       end
+
+      context "when the file has the _unlocked magic suffix" do
+        let(:doc_file) { File.expand_path("spec/fixtures/cuenta_unlocked.pdf") }
+        let(:doc_type) { build(:document_type, name_template: "{period} {original}") }
+
+        it "removes the _unlocked suffix from the {original} placeholder" do
+          expect(document.new_name).to eq("2019-01 cuenta.pdf")
+        end
+      end
     end
 
     describe "#store_path" do

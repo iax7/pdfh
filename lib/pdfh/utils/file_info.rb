@@ -4,6 +4,10 @@ module Pdfh
   # Encapsulates file system metadata for a PDF file path.
   # Responsible for all file name derivations (extension, base name, backup name, etc.).
   class FileInfo
+    # Magic suffix added by qpdf when unlocking a PDF. Treated as noise: it is
+    # never part of the real document name.
+    PDF_UNLOCKED_MAGIC_SUFFIX = "_unlocked"
+
     # @param file_path [String] Absolute or relative path to the PDF file
     # @return [self]
     def initialize(file_path)
@@ -13,9 +17,9 @@ module Pdfh
     # @return [String] Full path to the file
     attr_reader :path
 
-    # @return [String] File name without extension (e.g., "cuenta")
+    # @return [String] File name without extension or the `_unlocked` magic suffix (e.g., "cuenta")
     def stem
-      File.basename(@path, extension)
+      File.basename(@path, extension).delete_suffix(PDF_UNLOCKED_MAGIC_SUFFIX)
     end
     alias name_only stem
 
