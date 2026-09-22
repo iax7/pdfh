@@ -1,5 +1,18 @@
 # Changelog
 
+## v4.0.3 - 2026-09-21
+
+- Centralize `_unlocked` suffix handling in `FileInfo#stem`
+- Upgrade gems
+
+## v4.0.2 - 2026-08-03
+
+- Skip `.bkp` files when copying companion files
+
+## v4.0.1 - 2026-03-24
+
+- Fix incorrect `require`
+
 ## v4.0.0 - 2026-03-21
 
 ### Breaking
